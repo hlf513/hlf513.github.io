@@ -4,4 +4,4 @@ git checkout source
 git add .
 git commit -m 'update blog'
 git push origin source
-hexo d -g
+sudo hexo d -g
