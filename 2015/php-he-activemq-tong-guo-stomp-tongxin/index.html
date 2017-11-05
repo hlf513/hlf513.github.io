@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>php 通过 stomp 协议和 activemq 通信 | 贺龙飞的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="phpactiveMQ" />
+  
+  
+  
+  
+  <meta name="description" content="什么是 activeMQ？一个开源消息队列,使用 java 开发,属于 apache 基金会.官方网站:http://activemq.apache.org官方文档:http://activemq.apache.org/getting-started.html php 如何和 activeMQ 通信？采用 stomp 协议php 安装 stomp 的扩展1pecl install stomp 采用">
+<meta name="keywords" content="php,activeMQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP 通过 Stomp 协议和 ActiveMQ 通信">
+<meta property="og:url" content="http://www.helongfei.com/2015/php-he-activemq-tong-guo-stomp-tongxin/index.html">
+<meta property="og:site_name" content="贺龙飞的博客">
+<meta property="og:description" content="什么是 activeMQ？一个开源消息队列,使用 java 开发,属于 apache 基金会.官方网站:http://activemq.apache.org官方文档:http://activemq.apache.org/getting-started.html php 如何和 activeMQ 通信？采用 stomp 协议php 安装 stomp 的扩展1pecl install stomp 采用">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2017-11-05T12:44:05.208Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP 通过 Stomp 协议和 ActiveMQ 通信">
+<meta name="twitter:description" content="什么是 activeMQ？一个开源消息队列,使用 java 开发,属于 apache 基金会.官方网站:http://activemq.apache.org官方文档:http://activemq.apache.org/getting-started.html php 如何和 activeMQ 通信？采用 stomp 协议php 安装 stomp 的扩展1pecl install stomp 采用">
+  
+    <link rel="alternate" href="/atom.xml" title="贺龙飞的博客" type="application/atom+xml">
+  
+
+  
+
+  <link rel="icon" href="/css/images/mylogo.jpg">
+  <link rel="apple-touch-icon" href="/css/images/mylogo.jpg">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="/js/jquery-3.1.1.min.js"></script>
+  <script src="/js/bootstrap.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="/css/bootstrap.css" >
+
+  
+    <link rel="stylesheet" href="/css/dialog.css">
+  
+
+  
+
+  
+    <link rel="stylesheet" href="/css/header-post.css" >
+  
+
+  
+  
+  
+    <link rel="stylesheet" href="/css/vdonate.css" >
+  
+
+</head>
+
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  
+  <div id="container">
+    <div id="wrap">
+      
+        <header>
+
+    <div id="allheader" class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="navbar-inner">
+          
+          <div class="container"> 
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            
+              <a class="brand" style="
+                 margin-top: 0px;"  
+                href="#" data-toggle="modal" data-target="#myModal" >
+                  <img width="124px" height="124px" alt="Hike News" src="/css/images/mylogo.jpg">
+              </a>
+            
+            
+            <div class="navbar-collapse collapse">
+              <ul class="hnav navbar-nav">
+                
+                  <li> <a class="main-nav-link" href="/">首页</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/archives">归档</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/categories">分类</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/tags">标签</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/about">关于</a> </li>
+                
+                  <li><div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(无标题)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div></li>
+            </div>
+          </div>
+                
+      </div>
+    </div>
+
+</header>
+
+
+
+      
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-2015/php-he-activemq-tong-guo-stomp-tongxin" style="width: 75%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      PHP 通过 Stomp 协议和 ActiveMQ 通信
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2015/php-he-activemq-tong-guo-stomp-tongxin/" class="article-date">
+	  <time datetime="2015-11-25T16:32:26.000Z" itemprop="datePublished">2015-11-26</time>
+	</a>
+
+      
+      
+	<a class="article-views">
+	<span id="busuanzi_container_page_pv">
+		阅读量<span id="busuanzi_value_page_pv"></span>
+	</span>
+	</a>
+
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="什么是-activeMQ？"><a href="#什么是-activeMQ？" class="headerlink" title="什么是 activeMQ？"></a>什么是 activeMQ？</h1><p>一个开源消息队列,使用 java 开发,属于 apache 基金会.<br>官方网站:<a href="http://activemq.apache.org" target="_blank" rel="external">http://activemq.apache.org</a><br>官方文档:<a href="http://activemq.apache.org/getting-started.html" target="_blank" rel="external">http://activemq.apache.org/getting-started.html</a></p>
+<h1 id="php-如何和-activeMQ-通信？"><a href="#php-如何和-activeMQ-通信？" class="headerlink" title="php 如何和 activeMQ 通信？"></a>php 如何和 activeMQ 通信？</h1><p>采用 stomp 协议<br>php 安装 stomp 的扩展<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pecl install stomp</div></pre></td></tr></table></figure></p>
+<p>采用第三方的类库:<a href="https://github.com/dejanb/stomp-php" target="_blank" rel="external">https://github.com/dejanb/stomp-php</a></p>
+<h1 id="php-如何监控-activeMQ-中队列的状态？"><a href="#php-如何监控-activeMQ-中队列的状态？" class="headerlink" title="php 如何监控 activeMQ 中队列的状态？"></a>php 如何监控 activeMQ 中队列的状态？</h1><p>activeMQ 需要打开StatisticsPlugin<br>方法:<a href="http://activemq.apache.org/statisticsplugin.html" target="_blank" rel="external">http://activemq.apache.org/statisticsplugin.html</a></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * 获取指定队列的待处理消息数量</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * <span class="doctag">@param</span> string $queue 待查询的队列名</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * <span class="doctag">@return</span> mixed 成功返回待处理的消息数量</span></div><div class="line"><span class="comment"> */</span></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">getMQStatus</span><span class="params">($queue)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    $result = $num = <span class="keyword">FALSE</span>;</div><div class="line">    $statusqueue = <span class="string">"/queue/ActiveMQ.Statistics.Destination.&#123;$queue&#125;"</span>;<span class="comment">//固定格式</span></div><div class="line">    <span class="comment">//$statusqueue = "/queue/ActiveMQ/Statistics/Destination/&#123;$queue&#125;";//固定格式</span></div><div class="line"></div><div class="line">    <span class="comment">//开启ActiveMQ</span></div><div class="line">    $link = stomp_connect(<span class="string">'tcp://192.168.221.129:6161'</span>);<span class="comment">//broker 的地址</span></div><div class="line">    <span class="keyword">if</span> (!$link) &#123;</div><div class="line">        <span class="keyword">die</span>(<span class="string">"Can't connect MQ !!"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (<span class="keyword">FALSE</span> !== $link) &#123;</div><div class="line">        <span class="comment">//查询之后的结果存放处</span></div><div class="line">        $resultqueue = <span class="string">"/queue/test_status_&#123;$queue&#125;"</span>;</div><div class="line"></div><div class="line">        <span class="comment">//设定采用JSON格式</span></div><div class="line">        stomp_subscribe($link, $resultqueue, <span class="keyword">array</span>(<span class="string">"transformation"</span> =&gt; <span class="string">"jms-map-json"</span>));</div><div class="line">        <span class="comment">//送出空字符串</span></div><div class="line">        $result = stomp_send($link, $statusqueue, <span class="string">''</span>, <span class="keyword">array</span>(<span class="string">"reply-to"</span> =&gt; $resultqueue));</div><div class="line">        <span class="keyword">if</span> (<span class="keyword">FALSE</span> === $result) &#123;</div><div class="line">            <span class="keyword">echo</span> <span class="string">" send error"</span> . PHP_EOL;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//取得状态</span></div><div class="line">        <span class="keyword">while</span> (stomp_has_frame($link)) &#123;</div><div class="line">            $frame = stomp_read_frame($link);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (<span class="keyword">FALSE</span> != $frame) &#123;</div><div class="line">                stomp_ack($link, $frame[<span class="string">'headers'</span>][<span class="string">'message-id'</span>]);</div><div class="line">                $obj = json_decode($frame[<span class="string">'body'</span>], <span class="keyword">TRUE</span>);<span class="comment">//$obj 包含队列的所有信息</span></div><div class="line">                <span class="comment">//print_r($obj);</span></div><div class="line">                <span class="comment">//取得目前数量（尚可取得其他状态）</span></div><div class="line">                <span class="keyword">foreach</span> ($obj[<span class="string">'map'</span>][<span class="string">'entry'</span>] <span class="keyword">as</span> $pitem) &#123;</div><div class="line">                    <span class="keyword">if</span> (<span class="string">'size'</span> == $pitem[<span class="string">'string'</span>]) &#123;</div><div class="line">                        $num = $pitem[<span class="string">'long'</span>];</div><div class="line">                        <span class="keyword">break</span>;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        stomp_unsubscribe($link, $resultqueue);</div><div class="line">        stomp_close($link);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> $num;</div><div class="line">&#125;</div><div class="line"></div><div class="line">$num = getMQStatus(<span class="string">'spider'</span>);</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: '打赏支持', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: '',
+  alipayImage: ''
+});
+</script>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/activeMQ/">activeMQ</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/pandoc-ru-he-zi-ding-yi-docxyang-shi/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">
+        
+          Pandoc 如何自定义样式
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="toc-sidebar">
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是-activeMQ？"><span class="nav-number">1.</span> <span class="nav-text">什么是 activeMQ？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#php-如何和-activeMQ-通信？"><span class="nav-number">2.</span> <span class="nav-text">php 如何和 activeMQ 通信？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#php-如何监控-activeMQ-中队列的状态？"><span class="nav-number">3.</span> <span class="nav-text">php 如何监控 activeMQ 中队列的状态？</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      
+      <footer id="footer">
+  
+
+  <div class="container">
+      	<div class="row">
+	      <p> Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/iTimeTraveler/hexo-theme-hiker" target="_blank">Hexo-theme-hiker</a> </p>
+	      <p id="copyRightEn">Copyright &copy; 2012 - 2017 贺龙飞的博客 All Rights Reserved.</p>
+	      
+	      
+    		<p class="busuanzi_uv">
+				访客数 : <span id="busuanzi_value_site_uv"></span> |  
+				访问量 : <span id="busuanzi_value_site_pv"></span>
+		    </p>
+  		   
+		</div>
+
+		
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var wrapdiv = document.getElementById("wrap");
+    var contentdiv = document.getElementById("content");
+    var allheader = document.getElementById("allheader");
+
+    wrapdiv.style.minHeight = document.body.offsetHeight + "px";
+    if (allheader != null) {
+      contentdiv.style.minHeight = document.body.offsetHeight - allheader.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    } else {
+      contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    }
+</script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tags</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+
+
+
+
+  <script src="/js/dialog.js"></script>
+
+
+
+
+
+
+
+
+	<div style="display: none;">
+    <script src="https://s95.cnzz.com/z_stat.php?id=1267343220&web_id=1267343220" language="JavaScript"></script>
+  </div>
+
+
+
+	<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+  </div>
+
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="myModalLabel">设置</h2>
+      </div>
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+
+
+      <div class="modal-body">
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" onclick="javascript:setFontSize();" aria-expanded="true" aria-controls="collapseOne">
+              正文字号大小
+            </a>
+          </div>
+          <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            您已调整页面字体大小
+          </div>
+        </div>
+      
+
+
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" onclick="javascript:setBackground();" aria-expanded="true" aria-controls="collapseTwo">
+              夜间护眼模式
+            </a>
+        </div>
+          <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="panel-body">
+            夜间模式已经开启，再次单击按钮即可关闭 
+          </div>
+        </div>
+
+        <div>
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;关 于&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+        </div>
+         <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+          <div class="panel-body">
+            贺龙飞的博客
+          </div>
+          <div class="panel-body">
+            Copyright © 2017 helongfei All Rights Reserved.
+          </div>
+        </div>
+      </div>
+
+
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <div class="modal-footer">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+  
+    <a id="menu-switch"><i class="fa fa-bars fa-lg"></i></a>
+  
+</body>
+</html>

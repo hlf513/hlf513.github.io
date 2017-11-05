@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ci 框架总结 | 贺龙飞的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="phpCI" />
+  
+  
+  
+  
+  <meta name="description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。 中文手册http://codeigniter.org.cn/userguide2/index.html   框架运行图解运行流程图 运行生命周期 开发注意事项Controller 中 _remap 方法（接管路由） _output 方法（接管输出） _前缀的方法名都会被路由屏蔽">
+<meta name="keywords" content="php,CI">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CI 框架总结">
+<meta property="og:url" content="http://www.helongfei.com/2016/cikuang-jia-zong-jie/index.html">
+<meta property="og:site_name" content="贺龙飞的博客">
+<meta property="og:description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。 中文手册http://codeigniter.org.cn/userguide2/index.html   框架运行图解运行流程图 运行生命周期 开发注意事项Controller 中 _remap 方法（接管路由） _output 方法（接管输出） _前缀的方法名都会被路由屏蔽">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.helongfei.com/images/2016/0327/CI.png">
+<meta property="og:image" content="http://www.helongfei.com/images/2016/0327/CI2.png">
+<meta property="og:updated_time" content="2017-11-05T12:44:05.208Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CI 框架总结">
+<meta name="twitter:description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。 中文手册http://codeigniter.org.cn/userguide2/index.html   框架运行图解运行流程图 运行生命周期 开发注意事项Controller 中 _remap 方法（接管路由） _output 方法（接管输出） _前缀的方法名都会被路由屏蔽">
+<meta name="twitter:image" content="http://www.helongfei.com/images/2016/0327/CI.png">
+  
+    <link rel="alternate" href="/atom.xml" title="贺龙飞的博客" type="application/atom+xml">
+  
+
+  
+
+  <link rel="icon" href="/css/images/mylogo.jpg">
+  <link rel="apple-touch-icon" href="/css/images/mylogo.jpg">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="/js/jquery-3.1.1.min.js"></script>
+  <script src="/js/bootstrap.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="/css/bootstrap.css" >
+
+  
+    <link rel="stylesheet" href="/css/dialog.css">
+  
+
+  
+
+  
+    <link rel="stylesheet" href="/css/header-post.css" >
+  
+
+  
+  
+  
+    <link rel="stylesheet" href="/css/vdonate.css" >
+  
+
+</head>
+
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  
+  <div id="container">
+    <div id="wrap">
+      
+        <header>
+
+    <div id="allheader" class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="navbar-inner">
+          
+          <div class="container"> 
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            
+              <a class="brand" style="
+                 margin-top: 0px;"  
+                href="#" data-toggle="modal" data-target="#myModal" >
+                  <img width="124px" height="124px" alt="Hike News" src="/css/images/mylogo.jpg">
+              </a>
+            
+            
+            <div class="navbar-collapse collapse">
+              <ul class="hnav navbar-nav">
+                
+                  <li> <a class="main-nav-link" href="/">首页</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/archives">归档</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/categories">分类</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/tags">标签</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/about">关于</a> </li>
+                
+                  <li><div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(无标题)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div></li>
+            </div>
+          </div>
+                
+      </div>
+    </div>
+
+</header>
+
+
+
+      
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-2016/cikuang-jia-zong-jie" style="width: 75%; float:left;" class="article article-type-post" itemscope itemprop="blogPost" >
+  <div id="articleInner" class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" class="article-title" itemprop="name">
+      CI 框架总结
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2016/cikuang-jia-zong-jie/" class="article-date">
+	  <time datetime="2016-03-26T19:09:54.000Z" itemprop="datePublished">2016-03-27</time>
+	</a>
+
+      
+      
+	<a class="article-views">
+	<span id="busuanzi_container_page_pv">
+		阅读量<span id="busuanzi_value_page_pv"></span>
+	</span>
+	</a>
+
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>本文主要是参考2.2.6的源码</p>
+</blockquote>
+<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p>使用 &amp;get_instance(); 可以引用所有已加载的类。</p>
+<h1 id="中文手册"><a href="#中文手册" class="headerlink" title="中文手册"></a>中文手册</h1><p><a href="http://codeigniter.org.cn/userguide2/index.html" target="_blank" rel="external">http://codeigniter.org.cn/userguide2/index.html</a>  </p>
+<h1 id="框架运行图解"><a href="#框架运行图解" class="headerlink" title="框架运行图解"></a>框架运行图解</h1><h2 id="运行流程图"><a href="#运行流程图" class="headerlink" title="运行流程图"></a>运行流程图</h2><img src="/images/2016/0327/CI.png" class="center">
+<h2 id="运行生命周期"><a href="#运行生命周期" class="headerlink" title="运行生命周期"></a>运行生命周期</h2><img src="/images/2016/0327/CI2.png" class="center">
+<h1 id="开发注意事项"><a href="#开发注意事项" class="headerlink" title="开发注意事项"></a>开发注意事项</h1><h2 id="Controller-中"><a href="#Controller-中" class="headerlink" title="Controller 中"></a>Controller 中</h2><ul>
+<li><code>_remap</code> 方法（接管路由）</li>
+<li><code>_output</code> 方法（接管输出）</li>
+<li><code>_</code>前缀的方法名都会被路由屏蔽</li>
+</ul>
+<h1 id="如何扩展框架？"><a href="#如何扩展框架？" class="headerlink" title="如何扩展框架？"></a>如何扩展框架？</h1><h2 id="扩展-替换-core-类"><a href="#扩展-替换-core-类" class="headerlink" title="扩展/替换 core 类"></a>扩展/替换 core 类</h2><blockquote>
+<p>此类都是在系统使用的核心类，常用的是扩展控制器类</p>
+</blockquote>
+<p>在 application/core 下新建文件</p>
+<ul>
+<li><p>扩展</p>
+  <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">MY_controller</span> <span class="keyword">extends</span> <span class="title">CI_controller</span></span>&#123;&#125;</div></pre></td></tr></table></figure></li>
+<li><p>替换</p>
+  <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">CI_controller</span></span>&#123;&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="使用-新建-替换-扩展类库"><a href="#使用-新建-替换-扩展类库" class="headerlink" title="使用/新建/替换/扩展类库"></a>使用/新建/替换/扩展类库</h2><ol>
+<li><p>使用内置</p>
+ <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;library(<span class="string">'name'</span>);</div></pre></td></tr></table></figure>
+</li>
+<li><p>建立新的类<br> 在 applicatioin/libraries 目录下</p>
+</li>
+<li><p>扩展已有类<br> 在 applicatioin/libraries 目录下，使用定义好的子类前缀，并继承父类<br> 比如扩展 email：  </p>
+ <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">MY_Email</span> <span class="keyword">extends</span> <span class="title">CI_Email</span></span>&#123;&#125;</div></pre></td></tr></table></figure></li>
+<li>替换已有类<br> 在 applicatioin/libraries 目录下，声明和默认的类名一样的类</li>
+</ol>
+<h2 id="使用-新建适配器"><a href="#使用-新建适配器" class="headerlink" title="使用/新建适配器"></a>使用/新建适配器</h2><ul>
+<li>内置</li>
+</ul>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;driver(<span class="string">'some_parent'</span>);</div><div class="line"><span class="keyword">$this</span>-&gt;some_parent-&gt;some_method();</div><div class="line"><span class="keyword">$this</span>-&gt;some_parent-&gt;child_one-&gt;some_method();</div></pre></td></tr></table></figure>
+<ul>
+<li>自定义</li>
+</ul>
+<p>目录结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/application/libraries/Driver_name</div><div class="line">  Driver_name.php</div><div class="line">  drivers</div><div class="line">  	Driver_name_subclass_1.php</div><div class="line">  	Driver_name_subclass_2.php</div><div class="line">  	Driver_name_subclass_3.php</div></pre></td></tr></table></figure>
+<h2 id="集成自己的独立应用"><a href="#集成自己的独立应用" class="headerlink" title="集成自己的独立应用"></a>集成自己的独立应用</h2><p>目录结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/application/third_party/foo_bar</div><div class="line">config/</div><div class="line">helpers/</div><div class="line">language/</div><div class="line">libraries/</div><div class="line">models/</div></pre></td></tr></table></figure>
+<p>使用方法：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;add_package_path(APPPATH.<span class="string">'third_party/foo_bar/'</span>);</div><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;library(<span class="string">'foo_bar'</span>);</div><div class="line">...</div><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;remove_package_path(APPPATH.<span class="string">'third_party/foo_bar/'</span>);</div></pre></td></tr></table></figure>
+<h1 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h1><ol>
+<li>默认保存 SQL；cli 模式下会内存溢出;修复方式如下：</li>
+</ol>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">在配置文件中增加：</div><div class="line">$db[<span class="string">'default'</span>][<span class="string">'save_queries'</span>] = <span class="keyword">false</span>;</div><div class="line">或者在代码里增加:</div><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;database();</div><div class="line"><span class="keyword">$this</span>-&gt;db-&gt;save_queries = <span class="keyword">false</span>;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: '打赏支持', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: '',
+  alipayImage: ''
+});
+</script>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CI/">CI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/pandoc-sheng-cheng-html-huan-deng-pian/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">Pandoc 生成 Html 幻灯片</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="toc-sidebar">
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#设计思想"><span class="nav-number">1.</span> <span class="nav-text">设计思想</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#中文手册"><span class="nav-number">2.</span> <span class="nav-text">中文手册</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#框架运行图解"><span class="nav-number">3.</span> <span class="nav-text">框架运行图解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#运行流程图"><span class="nav-number">3.1.</span> <span class="nav-text">运行流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行生命周期"><span class="nav-number">3.2.</span> <span class="nav-text">运行生命周期</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开发注意事项"><span class="nav-number">4.</span> <span class="nav-text">开发注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Controller-中"><span class="nav-number">4.1.</span> <span class="nav-text">Controller 中</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何扩展框架？"><span class="nav-number">5.</span> <span class="nav-text">如何扩展框架？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展-替换-core-类"><span class="nav-number">5.1.</span> <span class="nav-text">扩展/替换 core 类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-新建-替换-扩展类库"><span class="nav-number">5.2.</span> <span class="nav-text">使用/新建/替换/扩展类库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-新建适配器"><span class="nav-number">5.3.</span> <span class="nav-text">使用/新建适配器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集成自己的独立应用"><span class="nav-number">5.4.</span> <span class="nav-text">集成自己的独立应用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#坑"><span class="nav-number">6.</span> <span class="nav-text">坑</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      
+      <footer id="footer">
+  
+
+  <div class="container">
+      	<div class="row">
+	      <p> Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/iTimeTraveler/hexo-theme-hiker" target="_blank">Hexo-theme-hiker</a> </p>
+	      <p id="copyRightEn">Copyright &copy; 2012 - 2017 贺龙飞的博客 All Rights Reserved.</p>
+	      
+	      
+    		<p class="busuanzi_uv">
+				访客数 : <span id="busuanzi_value_site_uv"></span> |  
+				访问量 : <span id="busuanzi_value_site_pv"></span>
+		    </p>
+  		   
+		</div>
+
+		
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var wrapdiv = document.getElementById("wrap");
+    var contentdiv = document.getElementById("content");
+    var allheader = document.getElementById("allheader");
+
+    wrapdiv.style.minHeight = document.body.offsetHeight + "px";
+    if (allheader != null) {
+      contentdiv.style.minHeight = document.body.offsetHeight - allheader.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    } else {
+      contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    }
+</script>
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tags</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+
+
+
+
+  <script src="/js/dialog.js"></script>
+
+
+
+
+
+
+
+
+	<div style="display: none;">
+    <script src="https://s95.cnzz.com/z_stat.php?id=1267343220&web_id=1267343220" language="JavaScript"></script>
+  </div>
+
+
+
+	<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+  </div>
+
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="myModalLabel">设置</h2>
+      </div>
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+
+
+      <div class="modal-body">
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" onclick="javascript:setFontSize();" aria-expanded="true" aria-controls="collapseOne">
+              正文字号大小
+            </a>
+          </div>
+          <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            您已调整页面字体大小
+          </div>
+        </div>
+      
+
+
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" onclick="javascript:setBackground();" aria-expanded="true" aria-controls="collapseTwo">
+              夜间护眼模式
+            </a>
+        </div>
+          <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="panel-body">
+            夜间模式已经开启，再次单击按钮即可关闭 
+          </div>
+        </div>
+
+        <div>
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;关 于&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+        </div>
+         <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+          <div class="panel-body">
+            贺龙飞的博客
+          </div>
+          <div class="panel-body">
+            Copyright © 2017 helongfei All Rights Reserved.
+          </div>
+        </div>
+      </div>
+
+
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <div class="modal-footer">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+  
+    <a id="menu-switch"><i class="fa fa-bars fa-lg"></i></a>
+  
+</body>
+</html>
