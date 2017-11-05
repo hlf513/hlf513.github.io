@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+open $BLOG_PATH -a Atom
