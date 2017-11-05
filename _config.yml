@@ -78,5 +78,4 @@ theme: hiker
 deploy:
   type: git
   repo: https://github.com/hlf513/hlf513.github.io.git
-  branch: gh-pages
-  
+  branch: master
