@@ -76,4 +76,7 @@ theme: hiker
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repo: https://github.com/hlf513/hlf513.github.io.git
+  branch: gh-pages
+  
