@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
+cd $BLOG_PATH
+git checkout source
+git pull
 open $BLOG_PATH -a Atom
