@@ -13,7 +13,7 @@ tags:
 # 设计思想
 
 使用 &get_instance(); 可以引用所有已加载的类。
-
+<!-- more -->
 # 中文手册
 http://codeigniter.org.cn/userguide2/index.html  
 # 框架运行图解
