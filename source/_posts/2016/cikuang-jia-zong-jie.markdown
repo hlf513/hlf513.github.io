@@ -1,12 +1,13 @@
 ---
 layout: post
-title: "CI 框架总结"
-date: 2016-03-27 03:09:54 +0800
+title: CI 框架总结
+date: '2016-03-27 03:09:54 +0800'
 tags:
   - php
   - CI
+categories:
+  - PHP
 ---
-
 
 >本文主要是参考2.2.6的源码
 
