@@ -79,3 +79,22 @@ deploy:
   type: git
   repo: https://github.com/hlf513/hlf513.github.io.git
   branch: master
+
+## Plugins: https://hexo.io/plugins/
+### JsonContent
+jsonContent:
+  meta: false
+  pages:
+    title: true
+    date: true
+    path: true
+    text: true
+  posts:
+    title: true
+    date: true
+    path: true
+    text: true
+    tags: true
+    categories: true
+  ignore:
+    - 404.html
