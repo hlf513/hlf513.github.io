@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 cd $BLOG_PATH
-git push orgin source
+git push origin source
 hexo d -g
