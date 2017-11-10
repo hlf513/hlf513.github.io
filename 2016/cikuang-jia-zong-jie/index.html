@@ -11,20 +11,20 @@
   
   
   
-  <meta name="description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。 中文手册http://codeigniter.org.cn/userguide2/index.html   框架运行图解运行流程图 运行生命周期 开发注意事项Controller 中 _remap 方法（接管路由） _output 方法（接管输出） _前缀的方法名都会被路由屏蔽">
+  <meta name="description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。">
 <meta name="keywords" content="php,CI">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CI 框架总结">
 <meta property="og:url" content="http://www.helongfei.com/2016/cikuang-jia-zong-jie/index.html">
 <meta property="og:site_name" content="贺龙飞的博客">
-<meta property="og:description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。 中文手册http://codeigniter.org.cn/userguide2/index.html   框架运行图解运行流程图 运行生命周期 开发注意事项Controller 中 _remap 方法（接管路由） _output 方法（接管输出） _前缀的方法名都会被路由屏蔽">
+<meta property="og:description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://www.helongfei.com/images/2016/0327/CI.png">
 <meta property="og:image" content="http://www.helongfei.com/images/2016/0327/CI2.png">
-<meta property="og:updated_time" content="2017-11-05T12:44:05.208Z">
+<meta property="og:updated_time" content="2017-11-08T15:31:12.884Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CI 框架总结">
-<meta name="twitter:description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。 中文手册http://codeigniter.org.cn/userguide2/index.html   框架运行图解运行流程图 运行生命周期 开发注意事项Controller 中 _remap 方法（接管路由） _output 方法（接管输出） _前缀的方法名都会被路由屏蔽">
+<meta name="twitter:description" content="本文主要是参考2.2.6的源码  设计思想使用 &amp;amp;get_instance(); 可以引用所有已加载的类。">
 <meta name="twitter:image" content="http://www.helongfei.com/images/2016/0327/CI.png">
   
     <link rel="alternate" href="/atom.xml" title="贺龙飞的博客" type="application/atom+xml">
@@ -188,6 +188,8 @@
 	</a>
 
       
+    <a class="article-category-link" href="/categories/PHP/">PHP</a>
+
       
 	<a class="article-views">
 	<span id="busuanzi_container_page_pv">
@@ -201,7 +203,7 @@
         <blockquote>
 <p>本文主要是参考2.2.6的源码</p>
 </blockquote>
-<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p>使用 &amp;get_instance(); 可以引用所有已加载的类。</p>
+<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p>使用 &amp;get_instance(); 可以引用所有已加载的类。<br><a id="more"></a></p>
 <h1 id="中文手册"><a href="#中文手册" class="headerlink" title="中文手册"></a>中文手册</h1><p><a href="http://codeigniter.org.cn/userguide2/index.html" target="_blank" rel="external">http://codeigniter.org.cn/userguide2/index.html</a>  </p>
 <h1 id="框架运行图解"><a href="#框架运行图解" class="headerlink" title="框架运行图解"></a>框架运行图解</h1><h2 id="运行流程图"><a href="#运行流程图" class="headerlink" title="运行流程图"></a>运行流程图</h2><img src="/images/2016/0327/CI.png" class="center">
 <h2 id="运行生命周期"><a href="#运行生命周期" class="headerlink" title="运行生命周期"></a>运行生命周期</h2><img src="/images/2016/0327/CI2.png" class="center">
@@ -274,16 +276,6 @@ var a = new Donate({
   </div>
   
     
-<nav id="article-nav">
-  
-  
-    <a href="/2016/pandoc-sheng-cheng-html-huan-deng-pian/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">下一篇</strong>
-      <div class="article-nav-title">Pandoc 生成 Html 幻灯片</div>
-    </a>
-  
-</nav>
-
   
 </article>
 
@@ -308,16 +300,18 @@ var a = new Donate({
       	<div class="row">
 	      <p> Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/iTimeTraveler/hexo-theme-hiker" target="_blank">Hexo-theme-hiker</a> </p>
 	      <p id="copyRightEn">Copyright &copy; 2012 - 2017 贺龙飞的博客 All Rights Reserved.</p>
-	      
+        <p>
+本站所有文章采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a>进行许可。
+</p>
 	      
     		<p class="busuanzi_uv">
-				访客数 : <span id="busuanzi_value_site_uv"></span> |  
+				访客数 : <span id="busuanzi_value_site_uv"></span> |
 				访问量 : <span id="busuanzi_value_site_pv"></span>
 		    </p>
   		   
 		</div>
 
-		
+
   </div>
 </footer>
 
@@ -336,6 +330,7 @@ var a = new Donate({
       contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("footer").offsetHeight + "px";
     }
 </script>
+
     </div>
     <!-- <nav id="mobile-nav">
   

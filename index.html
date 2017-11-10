@@ -198,6 +198,8 @@
 	</a>
 
       
+    <a class="article-category-link" href="/categories/PHP/">PHP</a>
+
       
     </div>
     <div class="article-entry" itemprop="articleBody">
@@ -205,54 +207,21 @@
         <blockquote>
 <p>本文主要是参考2.2.6的源码</p>
 </blockquote>
-<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p>使用 &amp;get_instance(); 可以引用所有已加载的类。</p>
-<h1 id="中文手册"><a href="#中文手册" class="headerlink" title="中文手册"></a>中文手册</h1><p><a href="http://codeigniter.org.cn/userguide2/index.html" target="_blank" rel="external">http://codeigniter.org.cn/userguide2/index.html</a>  </p>
-<h1 id="框架运行图解"><a href="#框架运行图解" class="headerlink" title="框架运行图解"></a>框架运行图解</h1><h2 id="运行流程图"><a href="#运行流程图" class="headerlink" title="运行流程图"></a>运行流程图</h2><img src="/images/2016/0327/CI.png" class="center">
-<h2 id="运行生命周期"><a href="#运行生命周期" class="headerlink" title="运行生命周期"></a>运行生命周期</h2><img src="/images/2016/0327/CI2.png" class="center">
-<h1 id="开发注意事项"><a href="#开发注意事项" class="headerlink" title="开发注意事项"></a>开发注意事项</h1><h2 id="Controller-中"><a href="#Controller-中" class="headerlink" title="Controller 中"></a>Controller 中</h2><ul>
-<li><code>_remap</code> 方法（接管路由）</li>
-<li><code>_output</code> 方法（接管输出）</li>
-<li><code>_</code>前缀的方法名都会被路由屏蔽</li>
-</ul>
-<h1 id="如何扩展框架？"><a href="#如何扩展框架？" class="headerlink" title="如何扩展框架？"></a>如何扩展框架？</h1><h2 id="扩展-替换-core-类"><a href="#扩展-替换-core-类" class="headerlink" title="扩展/替换 core 类"></a>扩展/替换 core 类</h2><blockquote>
-<p>此类都是在系统使用的核心类，常用的是扩展控制器类</p>
-</blockquote>
-<p>在 application/core 下新建文件</p>
-<ul>
-<li><p>扩展</p>
-  <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">MY_controller</span> <span class="keyword">extends</span> <span class="title">CI_controller</span></span>&#123;&#125;</div></pre></td></tr></table></figure></li>
-<li><p>替换</p>
-  <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">CI_controller</span></span>&#123;&#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="使用-新建-替换-扩展类库"><a href="#使用-新建-替换-扩展类库" class="headerlink" title="使用/新建/替换/扩展类库"></a>使用/新建/替换/扩展类库</h2><ol>
-<li><p>使用内置</p>
- <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;library(<span class="string">'name'</span>);</div></pre></td></tr></table></figure>
-</li>
-<li><p>建立新的类<br> 在 applicatioin/libraries 目录下</p>
-</li>
-<li><p>扩展已有类<br> 在 applicatioin/libraries 目录下，使用定义好的子类前缀，并继承父类<br> 比如扩展 email：  </p>
- <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">MY_Email</span> <span class="keyword">extends</span> <span class="title">CI_Email</span></span>&#123;&#125;</div></pre></td></tr></table></figure></li>
-<li>替换已有类<br> 在 applicatioin/libraries 目录下，声明和默认的类名一样的类</li>
-</ol>
-<h2 id="使用-新建适配器"><a href="#使用-新建适配器" class="headerlink" title="使用/新建适配器"></a>使用/新建适配器</h2><ul>
-<li>内置</li>
-</ul>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;driver(<span class="string">'some_parent'</span>);</div><div class="line"><span class="keyword">$this</span>-&gt;some_parent-&gt;some_method();</div><div class="line"><span class="keyword">$this</span>-&gt;some_parent-&gt;child_one-&gt;some_method();</div></pre></td></tr></table></figure>
-<ul>
-<li>自定义</li>
-</ul>
-<p>目录结构：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/application/libraries/Driver_name</div><div class="line">  Driver_name.php</div><div class="line">  drivers</div><div class="line">  	Driver_name_subclass_1.php</div><div class="line">  	Driver_name_subclass_2.php</div><div class="line">  	Driver_name_subclass_3.php</div></pre></td></tr></table></figure>
-<h2 id="集成自己的独立应用"><a href="#集成自己的独立应用" class="headerlink" title="集成自己的独立应用"></a>集成自己的独立应用</h2><p>目录结构：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">/application/third_party/foo_bar</div><div class="line">config/</div><div class="line">helpers/</div><div class="line">language/</div><div class="line">libraries/</div><div class="line">models/</div></pre></td></tr></table></figure>
-<p>使用方法：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;add_package_path(APPPATH.<span class="string">'third_party/foo_bar/'</span>);</div><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;library(<span class="string">'foo_bar'</span>);</div><div class="line">...</div><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;remove_package_path(APPPATH.<span class="string">'third_party/foo_bar/'</span>);</div></pre></td></tr></table></figure>
-<h1 id="坑"><a href="#坑" class="headerlink" title="坑"></a>坑</h1><ol>
-<li>默认保存 SQL；cli 模式下会内存溢出;修复方式如下：</li>
-</ol>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">在配置文件中增加：</div><div class="line">$db[<span class="string">'default'</span>][<span class="string">'save_queries'</span>] = <span class="keyword">false</span>;</div><div class="line">或者在代码里增加:</div><div class="line"><span class="keyword">$this</span>-&gt;load-&gt;database();</div><div class="line"><span class="keyword">$this</span>-&gt;db-&gt;save_queries = <span class="keyword">false</span>;</div></pre></td></tr></table></figure>
+<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p>使用 &amp;get_instance(); 可以引用所有已加载的类。<br>
+        <!-- 
+本文主要是参考2.2.6的源码
 
+设计思想使用 &amp;get_instance(); 可以引用所有已加载的类。
+中文手册http://codeigniter.org.cn/userguide2/index.html  
+框架运行图解运行流程图
+运行生命周期
+开发注意事项Controller 中
+_remap 方法（接管路由）
+_output 方法（接管输出）
+_前缀的方法名都会被路由屏......  -->
+        <p class="article-more-link">
+          <a href="/2016/cikuang-jia-zong-jie/#more">阅读全文</a>
+        </p>
       
     </div>
     <footer class="article-footer">
@@ -260,201 +229,6 @@
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CI/">CI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-<!-- Table of Contents -->
-
-  
-    <article id="post-2016/pandoc-sheng-cheng-html-huan-deng-pian"  class="article article-type-post" itemscope itemprop="blogPost" >
-  <div id="articleInner" class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="thumb" itemprop="name">
-      <a class="article-title" href="/2016/pandoc-sheng-cheng-html-huan-deng-pian/">Pandoc 生成 Html 幻灯片</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-meta">
-      
-	<a href="/2016/pandoc-sheng-cheng-html-huan-deng-pian/" class="article-date">
-	  <time datetime="2016-01-06T16:15:38.000Z" itemprop="datePublished">2016-01-07</time>
-	</a>
-
-      
-      
-    </div>
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>利用 markdown 直接生成 <a href="https://en.wikipedia.org/wiki/Web-based_slideshow" target="_blank" rel="external">web-based slideshow</a>；可以自定义 css ，足够灵活。</p>
-<h1 id="支持那些幻灯片框架？"><a href="#支持那些幻灯片框架？" class="headerlink" title="支持那些幻灯片框架？"></a>支持那些幻灯片框架？</h1><p>pandoc 包含5种 html 幻灯片框架：</p>
-<ul>
-<li><a href="https://github.com/paulrouget/dzslides" target="_blank" rel="external">DZSlides</a></li>
-<li><a href="http://www.w3.org/Talks/Tools/Slidy2/" target="_blank" rel="external">Slidy</a></li>
-<li><a href="http://meyerweb.com/eric/tools/s5/" target="_blank" rel="external">S5</a></li>
-<li><a href="http://goessner.net/articles/slideous/slideous.html" target="_blank" rel="external">Slideous</a></li>
-<li><a href="http://lab.hakim.se/reveal-js" target="_blank" rel="external">reveal.js</a></li>
-</ul>
-<p>实际上可以使用任何幻灯片框架（比如<a href="https://code.google.com/p/io-2012-slides/" target="_blank" rel="external">Google I/O HTML5 slide template</a>），只要让Pandoc在渲染HTML时使用你指定的模板即可.</p>
-<h1 id="生成默认模板的幻灯片"><a href="#生成默认模板的幻灯片" class="headerlink" title="生成默认模板的幻灯片"></a>生成默认模板的幻灯片</h1><p>pandoc 内置 dzslides 框架</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pandoc [*.md] -o [*.html] -t dzslides -s</div></pre></td></tr></table></figure>
-<h1 id="可选配置"><a href="#可选配置" class="headerlink" title="可选配置"></a>可选配置</h1><h2 id="渐进显示"><a href="#渐进显示" class="headerlink" title="渐进显示"></a>渐进显示</h2><ul>
-<li>生成幻灯片时加入 <code>-i</code> 选项，用于控制列表的显示效果（逐条渐入）</li>
-<li>两段文字显示之间的人为停顿: <code>...</code></li>
-</ul>
-<h2 id="强制分割"><a href="#强制分割" class="headerlink" title="强制分割"></a>强制分割</h2><p>默认是2级标题分割。<br>可以使用<code>-----------------</code>强制分割;也可以使用 <code>--slide-level</code> 选项覆盖默认的 Slide level</p>
-<h2 id="代码高亮风格"><a href="#代码高亮风格" class="headerlink" title="代码高亮风格"></a>代码高亮风格</h2><p>控制代码高亮风格的选项有：</p>
-<ul>
-<li>–highlight-style pygments</li>
-<li>–highlight-style kate</li>
-<li>–highlight-style monochrome</li>
-<li>–highlight-style espresso</li>
-<li>–highlight-style haddock</li>
-<li>–highlight-style tango</li>
-<li>–highlight-style zenburn</li>
-</ul>
-<h1 id="自定义样式"><a href="#自定义样式" class="headerlink" title="自定义样式"></a>自定义样式</h1><p>这里着重分析下 <strong>reveal.js</strong> ；为什么？因为只有它有提示板。</p>
-<h2 id="安装reveal-js"><a href="#安装reveal-js" class="headerlink" title="安装reveal.js"></a>安装reveal.js</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git <span class="built_in">clone</span> https://github.com/hakimel/reveal.js</div></pre></td></tr></table></figure>
-<h2 id="生成幻灯片-Html"><a href="#生成幻灯片-Html" class="headerlink" title="生成幻灯片 Html"></a>生成幻灯片 Html</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pandoc [*.md]  -o [*.html] -t revealjs -s [-V theme=beige]</div></pre></td></tr></table></figure>
-<p>支持的样式：</p>
-<ul>
-<li>default：（默认）深灰色背景，白色文字</li>
-<li>beige：米色背景，深色文字</li>
-<li>sky：天蓝色背景，白色细文字</li>
-<li>night：黑色背景，白色粗文字</li>
-<li>serif：浅色背景，灰色衬线文字</li>
-<li>simple：白色背景，黑色文字</li>
-<li>solarized：奶油色背景，深青色文字</li>
-</ul>
-<h2 id="提示板"><a href="#提示板" class="headerlink" title="提示板"></a>提示板</h2><p>按 s 触发；</p>
-<p>增加小抄：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">aside</span> <span class="attr">class</span>=<span class="string">"notes"</span>&gt;</span></div><div class="line"></div><div class="line">  * 这里是提示1</div><div class="line">  * 这里是提示2</div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">aside</span>&gt;</span></div></pre></td></tr></table></figure>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
-<li><a href="https://linux.cn/article-4080-1.html" target="_blank" rel="external">Markdown+Pandoc→HTML幻灯片速成</a></li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pandoc/">pandoc</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-<!-- Table of Contents -->
-
-  
-    <article id="post-2016/pandoc-ru-he-zi-ding-yi-docxyang-shi"  class="article article-type-post" itemscope itemprop="blogPost" >
-  <div id="articleInner" class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="thumb" itemprop="name">
-      <a class="article-title" href="/2016/pandoc-ru-he-zi-ding-yi-docxyang-shi/">Pandoc 如何自定义样式</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-meta">
-      
-	<a href="/2016/pandoc-ru-he-zi-ding-yi-docxyang-shi/" class="article-date">
-	  <time datetime="2016-01-04T14:38:32.000Z" itemprop="datePublished">2016-01-04</time>
-	</a>
-
-      
-      
-    </div>
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Pandoc"><a href="#Pandoc" class="headerlink" title="Pandoc"></a>Pandoc</h1><p>pandoc 是一个 markdown 文档转换工具，可以把 markdown 转换为诸多的格式，可以定制格式，编写过滤器等。<br>pandoc 支持的格式，可以参考官网：<a href="http://www.pandoc.org" target="_blank" rel="external">http://www.pandoc.org</a></p>
-<p>pandoc 的语法，请看：<a href="http://pandoc.org/README.html" target="_blank" rel="external">官网英文</a> /  <a href="http://elvisw.com/pandoc-markdown.html" target="_blank" rel="external">中文翻译</a></p>
-<p>pandoc 过滤器编写，请看：<a href="https://github.com/jgm/pandoc/wiki/Pandoc-Filters" target="_blank" rel="external">https://github.com/jgm/pandoc/wiki/Pandoc-Filters</a></p>
-<h1 id="如何自定义样式"><a href="#如何自定义样式" class="headerlink" title="如何自定义样式"></a>如何自定义样式</h1><h2 id="Html-样式"><a href="#Html-样式" class="headerlink" title="Html 样式"></a>Html 样式</h2><p>Html 可以指定 css 文件进行样式修改</p>
-<p><strong>方式一：引入 css 文件</strong></p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">table</span>&#123;<span class="attribute">border-collapse</span>:collapse;<span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#CCC</span>;<span class="attribute">background</span>:<span class="number">#efefef</span>;&#125;</div><div class="line"><span class="selector-tag">table</span> <span class="selector-tag">caption</span>&#123;<span class="attribute">text-align</span>:left; <span class="attribute">background-color</span>:<span class="number">#fff</span>; <span class="attribute">line-height</span>:<span class="number">2em</span>; <span class="attribute">font-size</span>:<span class="number">14px</span>; <span class="attribute">font-weight</span>:bold; &#125;</div><div class="line"><span class="selector-tag">table</span> <span class="selector-tag">th</span>&#123;<span class="attribute">text-align</span>:left; <span class="attribute">font-weight</span>:bold;<span class="attribute">height</span>:<span class="number">26px</span>; <span class="attribute">line-height</span>:<span class="number">26px</span>; <span class="attribute">font-size</span>:<span class="number">12px</span>; <span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#CCC</span>;&#125;</div><div class="line"><span class="selector-tag">table</span> <span class="selector-tag">td</span>&#123;<span class="attribute">height</span>:<span class="number">20px</span>; <span class="attribute">font-size</span>:<span class="number">12px</span>; <span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#CCC</span>;<span class="attribute">background-color</span>:<span class="number">#fff</span>;&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pandoc -s -c [cssfile] [mdfile] -o [htmlname]</div></pre></td></tr></table></figure>
-<p><strong>方式二：页面内置样式（写入 header）</strong></p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;style type="text/css"&gt;</div><div class="line"><span class="selector-tag">table</span>&#123;<span class="attribute">border-collapse</span>:collapse;<span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#CCC</span>;<span class="attribute">background</span>:<span class="number">#efefef</span>;&#125;</div><div class="line"><span class="selector-tag">table</span> <span class="selector-tag">caption</span>&#123;<span class="attribute">text-align</span>:left; <span class="attribute">background-color</span>:<span class="number">#fff</span>; <span class="attribute">line-height</span>:<span class="number">2em</span>; <span class="attribute">font-size</span>:<span class="number">14px</span>; <span class="attribute">font-weight</span>:bold; &#125;</div><div class="line"><span class="selector-tag">table</span> <span class="selector-tag">th</span>&#123;<span class="attribute">text-align</span>:left; <span class="attribute">font-weight</span>:bold;<span class="attribute">height</span>:<span class="number">26px</span>; <span class="attribute">line-height</span>:<span class="number">26px</span>; <span class="attribute">font-size</span>:<span class="number">12px</span>; <span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#CCC</span>;&#125;</div><div class="line"><span class="selector-tag">table</span> <span class="selector-tag">td</span>&#123;<span class="attribute">height</span>:<span class="number">20px</span>; <span class="attribute">font-size</span>:<span class="number">12px</span>; <span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#CCC</span>;<span class="attribute">background-color</span>:<span class="number">#fff</span>;&#125;</div><div class="line">&lt;/style&gt;</div></pre></td></tr></table></figure>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pandoc -s -H [cssfile] [mdfile] -o [htmlname]</div></pre></td></tr></table></figure>
-<h2 id="Docx-样式"><a href="#Docx-样式" class="headerlink" title="Docx 样式"></a>Docx 样式</h2><p>pandoc 可以使用 docx 模板进行渲染（注意：模板是修改样式，而不是内容）</p>
-<blockquote>
-<p>可以把自己修改后的样式保存为「word 模板」</p>
-</blockquote>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pandoc --reference-docx=[模板路径] [mdfile] -o [docxname]</div></pre></td></tr></table></figure>
-<h3 id="Docx-模板"><a href="#Docx-模板" class="headerlink" title="Docx 模板"></a>Docx 模板</h3><p>分享自己的 docx 模板（不断更新中） <a href="http://pan.baidu.com/s/1pLrNOq3" target="_blank" rel="external">技术文档docx模板</a></p>
-<h3 id="TeX-模板"><a href="#TeX-模板" class="headerlink" title="TeX 模板"></a>TeX 模板</h3><p>见 <a href="https://www.phodal.com/blog/pandoc-template-tex-pandoc/" target="_blank" rel="external">Phodal Huang 毕业设计模板</a> <a href="http://pan.baidu.com/s/1eQX70mm" target="_blank" rel="external">(百度盘备份)</a></p>
-<p>使用方法：需要保存为*.docx 文件，然后使用 <code>--template</code> 选项指定模板</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pandoc/">pandoc</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-<!-- Table of Contents -->
-
-  
-    <article id="post-2015/php-he-activemq-tong-guo-stomp-tongxin"  class="article article-type-post" itemscope itemprop="blogPost" >
-  <div id="articleInner" class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="thumb" itemprop="name">
-      <a class="article-title" href="/2015/php-he-activemq-tong-guo-stomp-tongxin/">PHP 通过 Stomp 协议和 ActiveMQ 通信</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-meta">
-      
-	<a href="/2015/php-he-activemq-tong-guo-stomp-tongxin/" class="article-date">
-	  <time datetime="2015-11-25T16:32:26.000Z" itemprop="datePublished">2015-11-26</time>
-	</a>
-
-      
-      
-    </div>
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="什么是-activeMQ？"><a href="#什么是-activeMQ？" class="headerlink" title="什么是 activeMQ？"></a>什么是 activeMQ？</h1><p>一个开源消息队列,使用 java 开发,属于 apache 基金会.<br>官方网站:<a href="http://activemq.apache.org" target="_blank" rel="external">http://activemq.apache.org</a><br>官方文档:<a href="http://activemq.apache.org/getting-started.html" target="_blank" rel="external">http://activemq.apache.org/getting-started.html</a></p>
-<h1 id="php-如何和-activeMQ-通信？"><a href="#php-如何和-activeMQ-通信？" class="headerlink" title="php 如何和 activeMQ 通信？"></a>php 如何和 activeMQ 通信？</h1><p>采用 stomp 协议<br>php 安装 stomp 的扩展<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pecl install stomp</div></pre></td></tr></table></figure></p>
-<p>采用第三方的类库:<a href="https://github.com/dejanb/stomp-php" target="_blank" rel="external">https://github.com/dejanb/stomp-php</a></p>
-<h1 id="php-如何监控-activeMQ-中队列的状态？"><a href="#php-如何监控-activeMQ-中队列的状态？" class="headerlink" title="php 如何监控 activeMQ 中队列的状态？"></a>php 如何监控 activeMQ 中队列的状态？</h1><p>activeMQ 需要打开StatisticsPlugin<br>方法:<a href="http://activemq.apache.org/statisticsplugin.html" target="_blank" rel="external">http://activemq.apache.org/statisticsplugin.html</a></p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"><span class="comment"> * 获取指定队列的待处理消息数量</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * <span class="doctag">@param</span> string $queue 待查询的队列名</span></div><div class="line"><span class="comment"> *</span></div><div class="line"><span class="comment"> * <span class="doctag">@return</span> mixed 成功返回待处理的消息数量</span></div><div class="line"><span class="comment"> */</span></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">getMQStatus</span><span class="params">($queue)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    $result = $num = <span class="keyword">FALSE</span>;</div><div class="line">    $statusqueue = <span class="string">"/queue/ActiveMQ.Statistics.Destination.&#123;$queue&#125;"</span>;<span class="comment">//固定格式</span></div><div class="line">    <span class="comment">//$statusqueue = "/queue/ActiveMQ/Statistics/Destination/&#123;$queue&#125;";//固定格式</span></div><div class="line"></div><div class="line">    <span class="comment">//开启ActiveMQ</span></div><div class="line">    $link = stomp_connect(<span class="string">'tcp://192.168.221.129:6161'</span>);<span class="comment">//broker 的地址</span></div><div class="line">    <span class="keyword">if</span> (!$link) &#123;</div><div class="line">        <span class="keyword">die</span>(<span class="string">"Can't connect MQ !!"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (<span class="keyword">FALSE</span> !== $link) &#123;</div><div class="line">        <span class="comment">//查询之后的结果存放处</span></div><div class="line">        $resultqueue = <span class="string">"/queue/test_status_&#123;$queue&#125;"</span>;</div><div class="line"></div><div class="line">        <span class="comment">//设定采用JSON格式</span></div><div class="line">        stomp_subscribe($link, $resultqueue, <span class="keyword">array</span>(<span class="string">"transformation"</span> =&gt; <span class="string">"jms-map-json"</span>));</div><div class="line">        <span class="comment">//送出空字符串</span></div><div class="line">        $result = stomp_send($link, $statusqueue, <span class="string">''</span>, <span class="keyword">array</span>(<span class="string">"reply-to"</span> =&gt; $resultqueue));</div><div class="line">        <span class="keyword">if</span> (<span class="keyword">FALSE</span> === $result) &#123;</div><div class="line">            <span class="keyword">echo</span> <span class="string">" send error"</span> . PHP_EOL;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//取得状态</span></div><div class="line">        <span class="keyword">while</span> (stomp_has_frame($link)) &#123;</div><div class="line">            $frame = stomp_read_frame($link);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (<span class="keyword">FALSE</span> != $frame) &#123;</div><div class="line">                stomp_ack($link, $frame[<span class="string">'headers'</span>][<span class="string">'message-id'</span>]);</div><div class="line">                $obj = json_decode($frame[<span class="string">'body'</span>], <span class="keyword">TRUE</span>);<span class="comment">//$obj 包含队列的所有信息</span></div><div class="line">                <span class="comment">//print_r($obj);</span></div><div class="line">                <span class="comment">//取得目前数量（尚可取得其他状态）</span></div><div class="line">                <span class="keyword">foreach</span> ($obj[<span class="string">'map'</span>][<span class="string">'entry'</span>] <span class="keyword">as</span> $pitem) &#123;</div><div class="line">                    <span class="keyword">if</span> (<span class="string">'size'</span> == $pitem[<span class="string">'string'</span>]) &#123;</div><div class="line">                        $num = $pitem[<span class="string">'long'</span>];</div><div class="line">                        <span class="keyword">break</span>;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        stomp_unsubscribe($link, $resultqueue);</div><div class="line">        stomp_close($link);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> $num;</div><div class="line">&#125;</div><div class="line"></div><div class="line">$num = getMQStatus(<span class="string">'spider'</span>);</div></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/activeMQ/">activeMQ</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
 
     </footer>
   </div>
@@ -479,16 +253,18 @@
       	<div class="row">
 	      <p> Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/iTimeTraveler/hexo-theme-hiker" target="_blank">Hexo-theme-hiker</a> </p>
 	      <p id="copyRightEn">Copyright &copy; 2012 - 2017 贺龙飞的博客 All Rights Reserved.</p>
-	      
+        <p>
+本站所有文章采用<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a>进行许可。
+</p>
 	      
     		<p class="busuanzi_uv">
-				访客数 : <span id="busuanzi_value_site_uv"></span> |  
+				访客数 : <span id="busuanzi_value_site_uv"></span> |
 				访问量 : <span id="busuanzi_value_site_pv"></span>
 		    </p>
   		   
 		</div>
 
-		
+
   </div>
 </footer>
 
@@ -507,6 +283,7 @@
       contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("footer").offsetHeight + "px";
     }
 </script>
+
     </div>
     <!-- <nav id="mobile-nav">
   
