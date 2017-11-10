@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
 cd $BLOG_PATH
-git add .
-git commit -m 'update blog'
-git pull
-git push
+git push orgin source
 hexo d -g
