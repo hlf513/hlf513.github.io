@@ -2,4 +2,4 @@
 cd $BLOG_PATH
 git checkout source
 git pull origin source
-open $BLOG_PATH -a Atom
+open $BLOG_PATH/source -a Atom

@@ -21,12 +21,12 @@ siteUrl: "http://www.helongfei.com"
 # - Leave it empty to use the current project path (recommended)
 siteLocalDir: ""
 # Directory to drafts from siteLocalDir
-siteDraftsDir: "source/_drafts/"
+siteDraftsDir: "_drafts/"
 # Directory to posts from siteLocalDir
-sitePostsDir: "source/_posts/{year}/"
+sitePostsDir: "_posts/{year}/"
 # Directory to images from siteLocalDir
 # - E.g. to use the current filename directory, can use {directory}
-siteImagesDir: "source/images/{year}/{month}/"
+siteImagesDir: "images/{year}/{month}/"
 
 # URLs to tags/posts/categories JSON files
 # https://github.com/zhuochun/md-writer/wiki/Settings-for-Front-Matters
