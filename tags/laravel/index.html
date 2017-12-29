@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   
-  <title>平凡之路</title>
+  <title>tag: laravel | 平凡之路</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   
   
@@ -11,7 +11,7 @@
   
   <meta property="og:type" content="website">
 <meta property="og:title" content="平凡之路">
-<meta property="og:url" content="http://www.helongfei.com/index.html">
+<meta property="og:url" content="http://www.helongfei.com/tags/laravel/index.html">
 <meta property="og:site_name" content="平凡之路">
 <meta property="og:locale" content="zh-CN">
 <meta name="twitter:card" content="summary">
@@ -44,15 +44,17 @@
   <link rel="stylesheet" href="/css/bootstrap.css">
 
   
-    <link rel="stylesheet" href="/css/home.css">
-  
-
-  
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/trianglify/0.4.0/trianglify.min.js"></script>
+    <link rel="stylesheet" href="/css/dialog.css">
   
 
   
 
+  
+    <link rel="stylesheet" href="/css/header-post.css">
+  
+
+  
+    <link rel="stylesheet" href="/css/archive.css">
   
   
   
@@ -67,232 +69,136 @@
 
 
   
-    <header id="header">
-
-	<!-- 背景图模式 -->
-	
-
-    
-      <div id="intrologo" class="intro-logo">
-    
- 
-
-
-    <canvas width="100%" height="100%"></canvas>
-    <script>
-      var c = document.getElementsByTagName('canvas')[0],
-          x = c.getContext('2d'),
-          w = window.innerWidth,
-          h = window.innerHeight,
-          pr = window.devicePixelRatio || 1,
-          f = 90,
-          q,
-          m = Math,
-          r = 0,
-          u = m.PI*2,
-          v = m.cos,
-          z = m.random
-      c.width = w*pr
-      c.height = h*pr
-      x.scale(pr, pr)
-      x.globalAlpha = 0.6
-
-      <!-- 折线Polyline背景 -->
-      
-		 function redraw(){
-		 	var pattern = Trianglify({
-				width: window.innerWidth,
-				height: window.innerHeight
-			});
-            pattern.canvas(c)
-        }
-        document.getElementById("intrologo").onclick = redraw
-        document.getElementById("intrologo").ontouchstart = redraw
-		redraw()
-      
-    </script>
-    
-
-    
-      <div id="homelogo" class="homelogo" style="background: rgba(255,255,255,1);"> 
-    
-
-        
-          <div class="homelogoback" style="border: 1px solid #404040;">
-            <h1><a href="#content" id="logo">平凡之路</a></h1>
-            <h3></h3>
-            <h5>贺龙飞</h5>
-            <!-- <p><a href="https://github.com/iTimeTraveler" target="_blank">Github</a></p> -->
-          </div>
-        
-    
-    </div>
-  </div>
-
-  <!-- 自适应主页背景大图 -->
-  
-
- <!-- home_logo_image居中 -->
- 
-    <script>
-        var homelogodiv = document.getElementById("homelogo");
-        if (document.all.homelogo.offsetWidth > document.body.clientWidth) {
-          homelogodiv.style.width = document.body.clientWidth + "px";
-          homelogodiv.style.marginLeft = document.body.clientWidth * -0.5 + "px";
-        } else {
-          homelogodiv.style.width = homelogodiv.clientWidth  + "px";
-          homelogodiv.style.marginLeft = (homelogodiv.clientWidth)  * -0.5 + "px";
-        }
-    </script>
-  
-
-  <div class="intro-navigate">
-      <p class="navigater-list">
-        
-          <a id="beautifont" class="main-nav-link" href="/">首页</a>
-        
-          <a id="beautifont" class="main-nav-link" href="/archives">归档</a>
-        
-          <a id="beautifont" class="main-nav-link" href="/categories">分类</a>
-        
-          <a id="beautifont" class="main-nav-link" href="/tags">标签</a>
-        
-          <a id="beautifont" class="main-nav-link" href="http://wiki.helongfei.com" rel="external nofollow noopener noreferrer" target="_blank">知识库</a>
-        
-          <a id="beautifont" class="main-nav-link" href="/about">关于</a>
-        
-      </p>
-  </div>
-
-</header>
-  
   <div id="container">
     <div id="wrap">
+      
+        <header>
+
+    <div id="allheader" class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="navbar-inner">
+          
+          <div class="container"> 
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            
+              <a class="brand" style="
+                 margin-top: 0px;">
+                  <img width="124px" height="124px" alt="Hike News" src="/css/images/mylogo.jpg">
+              </a>
+            
+            
+            <div class="navbar-collapse collapse">
+              <ul class="hnav navbar-nav">
+                
+                  <li> <a class="main-nav-link" href="/">首页</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/archives">归档</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/categories">分类</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/tags">标签</a> </li>
+                
+                  <li> <a class="main-nav-link" href="http://wiki.helongfei.com" rel="external nofollow noopener noreferrer" target="_blank">知识库</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/about">关于</a> </li>
+                
+                  <li><div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词...">
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(无标题)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div></li>
+            </ul></div>
+          </div>
+                
+      </div>
+    </div>
+
+</header>
+
+
+
       
             
       <div id="content" class="outer">
         
           <section id="main" style="float:none;">
   
-    <article id="post-2017/laravel自定义用户权限校验" class="article article-type-post" itemscope="" itemprop="blogPost">
-  <div id="articleInner" class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 class="thumb" itemprop="name">
-      <a class="article-title" href="/2017/laravel自定义用户权限校验/">Laravel自定义用户权限校验</a>
-    </h1>
   
-
-      </header>
     
-    <div class="article-meta">
+    
       
-	<a href="/2017/laravel自定义用户权限校验/" class="article-date">
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <h1><a href="/archives/2017" class="archive-year">2017</a></h1>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      
+	<a href="/2017/laravel自定义用户权限校验/" class="archive-article-date">
 	  <time datetime="2017-12-29T16:05:00.000Z" itemprop="datePublished">2017-12-30</time>
 	</a>
 
       
-    <a class="article-category-link" href="/categories/PHP/">PHP</a>
-
-      
-    </div>
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在现实的架构中，帐号体系往往会单独维护，应用需要鉴权的时候会请求用户中心接口，而<code>laravel</code>使用<code>auth</code>中间件时默认采用的是<code>session</code>进行鉴权，不能满足我们的需求，所以需要自定义权限校验。</p>
-<h1 id="Auth-中间件的工作原理"><a href="#Auth-中间件的工作原理" class="headerlink" title="Auth 中间件的工作原理"></a><code>Auth</code> 中间件的工作原理</h1>
-        <!-- 背景在现实的架构中，帐号体系往往会单独维护，应用需要鉴权的时候会请求用户中心接口，而laravel使用auth中间件时默认采用的是session进行鉴权，不能满足我们的需求，所以需要自定义权限校验。
-Auth 中间件的工作原理
-首先，在 app/Http/Kernel.php 中，发现 :12345protected $routeMiddleware = [       'auth' =&g......  -->
-        <p class="article-more-link">
-          <a href="/2017/laravel自定义用户权限校验/#more">阅读全文</a>
-        </p>
-      
-    </div>
-    <footer class="article-footer">
-      
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/">laravel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-<!-- Table of Contents -->
-
-  
-    <article id="post-2016/cikuang-jia-zong-jie" class="article article-type-post" itemscope="" itemprop="blogPost">
-  <div id="articleInner" class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
     <h1 class="thumb" itemprop="name">
-      <a class="article-title" href="/2016/cikuang-jia-zong-jie/">CI 框架总结</a>
+      <a class="archive-article-title" href="/2017/laravel自定义用户权限校验/">Laravel自定义用户权限校验</a>
     </h1>
   
 
-      </header>
-    
-    <div class="article-meta">
-      
-	<a href="/2016/cikuang-jia-zong-jie/" class="article-date">
-	  <time datetime="2016-03-26T19:09:54.000Z" itemprop="datePublished">2016-03-27</time>
-	</a>
-
-      
-    <a class="article-category-link" href="/categories/PHP/">PHP</a>
-
-      
-    </div>
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>本文主要是参考2.2.6的源码</p>
-</blockquote>
-<h1 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h1><p>使用 &amp;get_instance(); 可以引用所有已加载的类。<br>
-        <!-- 
-本文主要是参考2.2.6的源码
-
-设计思想使用 &amp;get_instance(); 可以引用所有已加载的类。
-中文手册http://codeigniter.org.cn/userguide2/index.html  
-框架运行图解运行流程图
-运行生命周期
-开发注意事项Controller 中
-_remap 方法（接管路由）
-_output 方法（接管输出）
-_前缀的方法名都会被路由屏......  -->
-        </p><p class="article-more-link">
-          <a href="/2016/cikuang-jia-zong-jie/#more">阅读全文</a>
-        </p>
-      
-    </div>
-    <footer class="article-footer">
-      
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CI/">CI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
-
-    </footer>
+    </header>
   </div>
-  
 </article>
-
-<!-- Table of Contents -->
-
+  
+  
+    </div></section>
   
 
 
 </section>
         
       </div>
-      
-        <div align="center" style="margin-top: 30px;"><hr class="hr" style="margin:0px; height:3px;"></div>
       
       <footer id="footer">
   
@@ -389,8 +295,6 @@ _前缀的方法名都会被路由屏......  -->
 
 <script src="/js/scripts.js"></script>
 
-
-  <script src="/js/home.js"></script>
 
 
 
