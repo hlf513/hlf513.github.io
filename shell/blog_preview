@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 cd $BLOG_PATH
-hexo server -drafts
+hexo server --drafts
