@@ -57,6 +57,13 @@ server {
   location @grafana {
     proxy_pass http://127.0.0.1:3000;
   }
+
+  # 若使用 url 接口鉴权，则开启此 location
+  #location ^~ /proxy/ {
+  #  internal; # 内部请求
+  #  proxy_pass http://someone-proxy.com/; # 必须有 /
+  #  proxy_set_header Accept "*/*";
+  #}
 }
 ```
 
@@ -101,6 +108,27 @@ local function getUsernameByRedis(token)
         return username
     end
     return
+end
+
+# 使用 url 鉴权
+function getUsernameByUrl(token)
+    local uri = "/proxy/get-user-info" # 这里接口地址按实际情况进行修改
+    --ngx.req.set_header("X-TOKEN", token)
+    res = ngx.location.capture(uri, {
+        method = ngx.HTTP_POST
+    })
+    if res.body then
+        local data = cjson.decode(res.body)
+        if data["code"] ~= 0 then
+            ngx.log(ngx.ERR, "request model for get user info was failed; msg:" .. data["message"])
+            ngx.exit(ngx.HTTP_BAD_GATEWAY)
+        end
+        local email = data["data"]["email"]
+        return email
+    else
+        ngx.log(ngx.ERR, "request model for get user info was failed; code:" .. res.status)
+        ngx.exit(ngx.HTTP_BAD_GATEWAY)
+    end
 end
 
 function closeRedis(redis)
@@ -153,18 +181,14 @@ if token then
     if username then
         setHeader(username)
         setCookie(username)
-        ngx.exec("@grafana")
-    else
-        ngx.exit(ngx.HTTP_UNAUTHORIZED)
     end
+    ngx.exec("@grafana")
 else
     local username = getUsernameByCookie()
     if username then
         setHeader(username)
-        ngx.exec("@grafana")
-    else
-        ngx.exit(ngx.HTTP_UNAUTHORIZED)
     end
+    ngx.exec("@grafana")
 end
 ```
 
