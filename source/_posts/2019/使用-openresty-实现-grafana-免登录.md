@@ -110,9 +110,9 @@ local function getUsernameByRedis(token)
     return
 end
 
-# 使用 url 鉴权
+-- 使用 url 鉴权
 function getUsernameByUrl(token)
-    local uri = "/proxy/get-user-info" # 这里接口地址按实际情况进行修改
+    local uri = "/proxy/get-user-info" -- 这里接口地址按实际情况进行修改
     --ngx.req.set_header("X-TOKEN", token)
     res = ngx.location.capture(uri, {
         method = ngx.HTTP_POST
