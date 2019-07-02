@@ -11,12 +11,12 @@ categories:
 
 在监控系统领域，相信大家都经历过 Zabbix 的时代；在公司刚起步，机器数量不多时，Zabbix 可以很好的满足我们的需求，但是随着业务的发展，Zabbix 的存储会成为主要的性能瓶颈，从而引发很多问题，增加运维成本。
 
-近些年来，随着互联网技术的不断发展，技术架构的不断演进，监控领域有两个我值得推荐的开源系统：一个是小米出品的 Open-falcon，一个是基于 Google Borgmon 的开源实现 Prometheus。
+近些年来，随着互联网技术的不断发展，技术架构的不断演进，监控领域有两个我值得推荐的开源系统：一个是小米出品的 Open-Falcon，一个是基于 Google Borgmon 的开源实现 Prometheus。
 
-今天主要介绍下 Open-falcon。
+今天主要介绍下 Open-Falcon。
 <!-- more -->
 
-Open-falcon 有如下特点：
+Open-Falcon 有如下特点：
 1. **强大灵活的数据采集**：自动发现，支持falcon-agent、snmp、支持用户主动push、用户自定义插件支持、opentsdb data model like（timestamp、endpoint、metric、key-value tags）
 1. **水平扩展能力**：支持每个周期上亿次的数据采集、告警判定、历史数据存储和查询
 1. **高效率的告警策略管理**：高效的portal、支持策略模板、模板继承和覆盖、多种告警方式、支持callback调用
@@ -143,6 +143,9 @@ Open-falcon 把数据按照用途分成两类，一类是用来绘图的，一�
 
 # 使用示例
 
+## 部署
+参见[小米公司部署Open-Falcon的一些实践经验](http://book.open-falcon.org/zh_0_2/practice/deploy.html)
+
 ## 监控网络
 ![dashboard](/images/2019/06/dashboard.png)
 ![Screen](/images/2019/06/screen.png)
@@ -155,4 +158,4 @@ Open-falcon 把数据按照用途分成两类，一类是用来绘图的，一�
 ![falcon](/images/2019/06/falcon.png)
 
 # 参考资料
-1. [open-falcon](https://github.com/open-falcon/falcon-plus)
+1. [Open-Falcon 官方文档](https://github.com/open-falcon/falcon-plus)
