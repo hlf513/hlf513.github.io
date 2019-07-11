@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>go 并发编程-应用篇 | Longford&#39;s Space</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="go">
+  
+  
+  
+  
+  <meta name="description" content="Go 并发编程-应用篇当提到并发编程的时候，人们往往会想到多线程，而 Go 最被人熟知的是借鉴 CSP 的 gorountine &amp;amp; channel 并发模式，那 Go 中是否支持类似传统多线程的并发编程方式呢？答案是支持；因为 Go 的 Sync 包给我们提供了互斥锁、原子操作、条件变量等同步原语。">
+<meta name="keywords" content="go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 并发编程-应用篇">
+<meta property="og:url" content="http://www.helongfei.com/2019/go-并发编程-应用篇/index.html">
+<meta property="og:site_name" content="Longford&#39;s Space">
+<meta property="og:description" content="Go 并发编程-应用篇当提到并发编程的时候，人们往往会想到多线程，而 Go 最被人熟知的是借鉴 CSP 的 gorountine &amp;amp; channel 并发模式，那 Go 中是否支持类似传统多线程的并发编程方式呢？答案是支持；因为 Go 的 Sync 包给我们提供了互斥锁、原子操作、条件变量等同步原语。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.helongfei.com/images/2019/07/channel-pipeline.png">
+<meta property="og:updated_time" content="2019-07-11T17:21:38.241Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 并发编程-应用篇">
+<meta name="twitter:description" content="Go 并发编程-应用篇当提到并发编程的时候，人们往往会想到多线程，而 Go 最被人熟知的是借鉴 CSP 的 gorountine &amp;amp; channel 并发模式，那 Go 中是否支持类似传统多线程的并发编程方式呢？答案是支持；因为 Go 的 Sync 包给我们提供了互斥锁、原子操作、条件变量等同步原语。">
+<meta name="twitter:image" content="http://www.helongfei.com/images/2019/07/channel-pipeline.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Longford&#39;s Space" type="application/atom+xml">
+  
+
+  
+
+  <link rel="icon" href="/css/images/mylogo.jpg">
+  <link rel="apple-touch-icon" href="/css/images/mylogo.jpg">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="/js/jquery-3.1.1.min.js"></script>
+  <script src="/js/bootstrap.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="/css/bootstrap.css">
+
+  
+    <link rel="stylesheet" href="/css/dialog.css">
+  
+
+  
+
+  
+    <link rel="stylesheet" href="/css/header-post.css">
+  
+
+  
+  
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+</head>
+</html>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  
+  <div id="container">
+    <div id="wrap">
+      
+        <header>
+
+    <div id="allheader" class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="navbar-inner">
+          
+          <div class="container"> 
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            
+              <a class="brand" style="
+                 margin-top: 0px;" href="#" data-toggle="modal" data-target="#myModal">
+                  <img width="124px" height="124px" alt="Hike News" src="/css/images/mylogo.jpg">
+              </a>
+            
+            
+            <div class="navbar-collapse collapse">
+              <ul class="hnav navbar-nav">
+                
+                  <li> <a class="main-nav-link" href="/">首页</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/archives">归档</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/categories">分类</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/tags">标签</a> </li>
+                
+                  <li> <a class="main-nav-link" href="http://wiki.helongfei.com" rel="external nofollow noopener noreferrer" target="_blank">知识库</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/about">关于</a> </li>
+                
+                  <li><div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词...">
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(无标题)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div></li>
+            </ul></div>
+          </div>
+                
+      </div>
+    </div>
+
+</header>
+
+
+
+      
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-2019/go-并发编程-应用篇" style="width: 75%; float:left;" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div id="articleInner" class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" itemprop="name">
+      Go 并发编程-应用篇
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2019/go-并发编程-应用篇/" class="article-date">
+	  <time datetime="2019-07-11T17:16:00.000Z" itemprop="datePublished">2019-07-12</time>
+	</a>
+
+      
+    <a class="article-category-link" href="/categories/go/">go</a>
+
+      
+	<a class="article-views">
+	<span id="busuanzi_container_page_pv">
+		阅读量<span id="busuanzi_value_page_pv"></span>
+	</span>
+	</a>
+
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><h1 id="Go-并发编程-应用篇"><a href="#Go-并发编程-应用篇" class="headerlink" title="Go 并发编程-应用篇"></a>Go 并发编程-应用篇</h1><p>当提到并发编程的时候，人们往往会想到多线程，而 Go 最被人熟知的是借鉴 CSP 的 gorountine &amp; channel 并发模式，那 Go 中是否支持类似传统多线程的并发编程方式呢？答案是支持；因为 Go 的 Sync 包给我们提供了互斥锁、原子操作、条件变量等同步原语。</p>
+<a id="more"></a>
+<h2 id="同步原语"><a href="#同步原语" class="headerlink" title="同步原语"></a>同步原语</h2><h3 id="Mutex"><a href="#Mutex" class="headerlink" title="Mutex"></a>Mutex</h3><blockquote>
+<p>互斥锁，1.9 引入「饥饿模式」解决了尾延时（队列头的 Goroutine 会被新建 Goroutine 抢占锁）</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> s sync.RWMutex</span><br><span class="line"></span><br><span class="line">s.Lock()</span><br><span class="line"></span><br><span class="line"><span class="comment">// handler something</span></span><br><span class="line"></span><br><span class="line">s.Unlock()</span><br></pre></td></tr></table></figure>
+<h3 id="RWMutex"><a href="#RWMutex" class="headerlink" title="RWMutex"></a>RWMutex</h3><blockquote>
+<p> 读写互斥锁，用于并发读</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> s sync.RWMutex</span><br><span class="line"></span><br><span class="line">s.RLock()</span><br><span class="line"></span><br><span class="line"><span class="comment">// handler something</span></span><br><span class="line"></span><br><span class="line">s.RUnlock()</span><br></pre></td></tr></table></figure>
+<h3 id="Once"><a href="#Once" class="headerlink" title="Once"></a>Once</h3><blockquote>
+<p>只执行一次；即使执行的是不同的 func，也只会执行一次。</p>
+</blockquote>
+<p>Once 只有一个 Do 方法，参数是函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> s sync.Once</span><br><span class="line"></span><br><span class="line">onceFunc := <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="built_in">print</span>(<span class="string">"once"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">onceFunc2 := <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="built_in">print</span>(<span class="string">"once"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 只会输出一个 once</span></span><br><span class="line">s.Do(onceFunc)</span><br><span class="line">s.Do(onceFunc2)</span><br></pre></td></tr></table></figure>
+<h3 id="Atomic"><a href="#Atomic" class="headerlink" title="Atomic"></a>Atomic</h3><blockquote>
+<p>原子操作</p>
+</blockquote>
+<p>sync/atomic 提供了针对整型、通用类型的原子操作。</p>
+<p>针对整型的方法有：加(Add)、CAS(交换并比较 compare and swap)、存储(store)、读取(load)以及交换(swap)：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 还支持 uint32、int64 等</span></span><br><span class="line"><span class="keyword">var</span> i <span class="keyword">int32</span></span><br><span class="line">i = <span class="number">1</span></span><br><span class="line">atomic.AddInt32(&amp;i, <span class="number">2</span>)</span><br><span class="line"><span class="comment">// 不会改变 i 的值</span></span><br><span class="line">atomic.CompareAndSwapInt32(&amp;i, <span class="number">2</span>, <span class="number">10</span>)</span><br><span class="line"><span class="comment">// 会改变 i 的值</span></span><br><span class="line">atomic.CompareAndSwapInt32(&amp;i, <span class="number">3</span>, <span class="number">11</span>)</span><br><span class="line"><span class="comment">// 交换值，并返回旧值的指针</span></span><br><span class="line">atomic.SwapInt32(&amp;i, <span class="number">-1</span>)</span><br><span class="line">fmt.Println(atomic.LoadInt32(&amp;i))</span><br><span class="line"><span class="comment">// 存储值</span></span><br><span class="line">atomic.StoreInt32(&amp;i, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>针对通用类型的方法有：Store 存储、Load 读取</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> atomicVal atomic.Value</span><br><span class="line"></span><br><span class="line">str := <span class="string">"hello"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 存储</span></span><br><span class="line">atomicVal.Store(str)</span><br><span class="line"><span class="comment">// 读取</span></span><br><span class="line">fmt.Println(atomicVal.Load())</span><br></pre></td></tr></table></figure>
+<h3 id="Cond"><a href="#Cond" class="headerlink" title="Cond"></a>Cond</h3><blockquote>
+<p>让 Goroutine 在某个条件下被阻塞/唤醒</p>
+</blockquote>
+<p>Cond 提供三个方法：Wait 阻塞、Signal 唤醒、Broadcast 唤醒所有 Goroutine；</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 初始化需要一个锁</span></span><br><span class="line">	c := sync.NewCond(&amp;sync.Mutex&#123;&#125;)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> listen(c)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> broadcast(c)</span><br><span class="line"></span><br><span class="line">	ch := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal, <span class="number">1</span>)</span><br><span class="line">	signal.Notify(ch, os.Interrupt)</span><br><span class="line">	&lt;-ch</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">listen</span><span class="params">(c *sync.Cond)</span></span> &#123;</span><br><span class="line">	c.L.Lock()</span><br><span class="line">	c.Wait() <span class="comment">// 阻塞；以下代码暂不执行</span></span><br><span class="line">	fmt.Println(<span class="string">"listen"</span>)</span><br><span class="line">	c.L.Unlock()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">broadcast</span><span class="params">(c *sync.Cond)</span></span> &#123;</span><br><span class="line">	c.L.Lock()</span><br><span class="line">	c.Broadcast() <span class="comment">// 唤醒所有的 Goroutine</span></span><br><span class="line">	fmt.Println(<span class="string">"release"</span>)</span><br><span class="line">	c.L.Unlock()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用 Singal 会唤醒阻塞时间最长的 Goroutine。</p>
+<h3 id="WaitGroup"><a href="#WaitGroup" class="headerlink" title="WaitGroup"></a>WaitGroup</h3><blockquote>
+<p>最常用的同步机制，多用于等待一批 Goroutine 的返回</p>
+</blockquote>
+<p>WaitGroup 提供三个方法：Add 计数、Done 完成（计数-1）、Wait 阻塞到计数为0为止</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">  wg.Add(<span class="number">1</span>)</span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      wg.Done()</span><br><span class="line">    &#125;()</span><br><span class="line">    fmt.Println(<span class="string">"handler something"</span>)</span><br><span class="line">  &#125;()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">wg.Wait()</span><br></pre></td></tr></table></figure>
+<h2 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h2><h3 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h3><blockquote>
+<p>1.9 引入的并发安全 sync.map（1.9 之前的 map 在不加锁的前提下进行写操作会报错）</p>
+</blockquote>
+<p>Map 提供五个方法：Store 存储键值对、LoadOrStore 读取或存储键值对、Load 读取键值对、Delete 删除键值对、Range 遍历键值对</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> m sync.Map</span><br><span class="line"></span><br><span class="line">m.Store(<span class="string">"k"</span>, <span class="string">"v"</span>)</span><br><span class="line">m.Load(<span class="string">"k"</span>)</span><br><span class="line"><span class="comment">// 不会覆盖 k 的值</span></span><br><span class="line">m.LoadOrStore(<span class="string">"k"</span>, <span class="string">"v1"</span>)</span><br><span class="line"><span class="comment">// 会覆盖 k 的值</span></span><br><span class="line">m.Store(<span class="string">"k"</span>, <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</span><br><span class="line">  <span class="string">"k1"</span>: <span class="string">"v1"</span>,</span><br><span class="line">&#125;)</span><br><span class="line">m.Range(<span class="function"><span class="keyword">func</span><span class="params">(key, value <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">  fmt.Println(key, value)</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="Pool"><a href="#Pool" class="headerlink" title="Pool"></a>Pool</h3><blockquote>
+<p>并发安全，用于存储可复用的临时对象，以减少垃圾回收的压力</p>
+</blockquote>
+<p>Pool 提供了两个方法：Get 获取对象，Put 放入对象</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 一个[]byte的对象池，每个对象为一个[]byte</span></span><br><span class="line"><span class="keyword">var</span> bytePool = sync.Pool&#123;</span><br><span class="line">  <span class="comment">// 获取对象不存在时则创建</span></span><br><span class="line">  New: <span class="function"><span class="keyword">func</span><span class="params">()</span> <span class="title">interface</span></span>&#123;&#125; &#123;</span><br><span class="line">    b := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</span><br><span class="line">    <span class="keyword">return</span> &amp;b</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 获取对象</span></span><br><span class="line">obj := bytePool.Get().(*[]<span class="keyword">byte</span>)</span><br><span class="line">_ = obj</span><br><span class="line"><span class="comment">// 对象放入池子</span></span><br><span class="line">bytePool.Put(obj)</span><br></pre></td></tr></table></figure>
+<h2 id="上下文-Context"><a href="#上下文-Context" class="headerlink" title="上下文 Context"></a>上下文 Context</h2><p>当我们在 Goroutine 中再次产生一个 Goroutine 的时候，若前者异常退出，理论上后者也应该退出，否则就是对资源的浪费。</p>
+<p><strong>Context 的主要作用就是在不同的 Goroutine 之间同步请求特定的数据、取消信号以及处理请求的截止日期。</strong></p>
+<p>可以把 Context 类比为一棵树结构：</p>
+<ul>
+<li><p>根节点不可取消；那生成根节点的方法有：context.Background()、context.TODO()；两者的区别是没有本质区别，当不知道使用什么的时候用 TODO()；常用的是 Background()。</p>
+</li>
+<li><p>生成子节点的方法有：WithCancel 手动取消、WithDeadline 定时取消、WithTImeout 定时取消、WithValue 存键值对</p>
+</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line"><span class="comment">// 手动取消</span></span><br><span class="line">cancel()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定时取消 - 截止</span></span><br><span class="line">d := time.Now().Add(<span class="number">50</span> * time.Millisecond)</span><br><span class="line">ctx, cancel := context.WithDeadline(context.Background(), d)</span><br><span class="line"><span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定时取消 - 超时</span></span><br><span class="line">ctx, cancel := context.WithTimeout(context.Background(), <span class="number">50</span>*time.Millisecond)</span><br><span class="line"><span class="keyword">defer</span> cancel()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 存键值对(先找子节点再找父节点)</span></span><br><span class="line">ctx := context.WithValue(context.Background(), <span class="string">"kkk"</span>, <span class="string">"vvv"</span>)</span><br><span class="line">fmt.Println(ctx.Value(<span class="string">"kkk"</span>))</span><br></pre></td></tr></table></figure>
+<p>键值对不要存过多的参数，一般常用来存储 global trace id。</p>
+<h2 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h2><p>Channel 分为无缓存、有缓存；在另一端准备好数据之前，发送和接收都会阻塞；若是有缓存的 channel，则缓存未满之前是不阻塞的。</p>
+<p>使用起来比较简单；提供四个方法：</p>
+<ol>
+<li>创建 channel</li>
+<li>数据写入 channel</li>
+<li>读取 channel 数据</li>
+<li>关闭 channel（无法写入数据，但可以读取）</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// 无缓存</span></span><br><span class="line">	ch1 := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="comment">// 有缓存</span></span><br><span class="line">	<span class="comment">//ch1 := make(chan int,10)</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 接收数据</span></span><br><span class="line">	<span class="keyword">go</span> receive(ch1)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 发送数据</span></span><br><span class="line">	send(ch1)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 关闭 channel</span></span><br><span class="line">	<span class="built_in">close</span>(ch1)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">send</span><span class="params">(ch <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">2</span>; i++ &#123;</span><br><span class="line">		ch &lt;- i</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">receive</span><span class="params">(ch <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	d := &lt;-ch</span><br><span class="line">	fmt.Println(<span class="string">"one"</span>, d)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> d := <span class="keyword">range</span> ch &#123;</span><br><span class="line">		fmt.Println(<span class="string">"two"</span>, d)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">chan</span> &lt;- <span class="keyword">int</span>  # 只发送(可以执行 <span class="built_in">close</span> )</span><br><span class="line">&lt;- <span class="keyword">chan</span> <span class="keyword">int</span>  # 只接收</span><br></pre></td></tr></table></figure>
+<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ol>
+<li><p>信号传递</p>
+<p>一端阻塞，直到另一端发送数据；常和 WaitGroup 配合控制并发数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"handler something"</span>)</span><br><span class="line">		<span class="comment">// 通知 main goroutine 任务处理完毕</span></span><br><span class="line">		ch &lt;- <span class="number">1</span></span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 阻塞；等待新建 goroutine 中处理任务</span></span><br><span class="line">	&lt;-ch</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>消息队列</p>
+<p>常规用法，把数据放入 channel 等待消费；一般使用有缓存 的 channel。</p>
+</li>
+<li><p>多个 channel 串联为 Pipeline</p>
+</li>
+</ol>
+<p><img src="/images/2019/07/channel-pipeline.png" alt="channel-pipeline"><br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">   naturals := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">   squares := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">   <span class="comment">// Counter</span></span><br><span class="line">   <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      <span class="keyword">for</span> x := <span class="number">0</span>; x &lt; <span class="number">100</span>; x++ &#123;</span><br><span class="line">         naturals &lt;- x</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">close</span>(naturals)</span><br><span class="line">   &#125;()</span><br><span class="line">   <span class="comment">// Squarer</span></span><br><span class="line">   <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      <span class="keyword">for</span> x := <span class="keyword">range</span> naturals &#123;</span><br><span class="line">         squares &lt;- x * x</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">close</span>(squares)</span><br><span class="line">   &#125;()</span><br><span class="line">   <span class="comment">// Printer (in main goroutine)</span></span><br><span class="line">   <span class="keyword">for</span> x := <span class="keyword">range</span> squares &#123;</span><br><span class="line">      fmt.Println(x)</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Select"><a href="#Select" class="headerlink" title="Select"></a>Select</h3><p>多路复用；语法类似 Switch，有 default 则不阻塞，无 default 则：</p>
+<ul>
+<li>条件都未成立，则阻塞</li>
+<li>条件分支某个成立，则执行</li>
+<li>条件分支都成立，则随机选择一个</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">  <span class="keyword">select</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> d1 := &lt;-ch1:</span><br><span class="line">    fmt.Println(d1)</span><br><span class="line">    <span class="keyword">case</span> &lt;-time.After(time.Duration(<span class="number">3</span>) * time.Second): <span class="comment">// 设置超时时间</span></span><br><span class="line">    fmt.Println(<span class="string">"timeout"</span>)</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">    fmt.Println(<span class="string">"default"</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Goroutine-泄露"><a href="#Goroutine-泄露" class="headerlink" title="Goroutine 泄露"></a>Goroutine 泄露</h3><p>Goroutine 的开销很小，但若是使用不当，造成 GC 无法回收的话，久而久之就会引起内存耗尽。</p>
+<h4 id="常见场景"><a href="#常见场景" class="headerlink" title="常见场景"></a>常见场景</h4><ol>
+<li><p>使用了 nil channel</p>
+<blockquote>
+<p>永远阻塞</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ch <span class="keyword">chan</span> <span class="keyword">int</span></span><br><span class="line">ch &lt;- <span class="number">1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>没有接收者的 channel</p>
+<p>例：并发请求两个搜索引擎，响应结果写入 channel；我们使用最先收到的响应，丢失之后的响应，这样会造成后者 goroutine 一直阻塞</p>
+<p>解决方案：保证 channel 里的数据都会被读取，或者使用 context 取消其他请求。</p>
+</li>
+<li><p>没有发送者的 channel</p>
+</li>
+<li><p>程序死循环</p>
+</li>
+</ol>
+<h4 id="泄露检测"><a href="#泄露检测" class="headerlink" title="泄露检测"></a>泄露检测</h4><ol>
+<li><p>观察 runtime.NumGoroutine</p>
+</li>
+<li><p>pprof</p>
+<ol>
+<li><p>通过 web 查看</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"log"</span></span><br><span class="line">    <span class="string">"net/http"</span></span><br><span class="line">    _ <span class="string">"net/http/pprof"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">log.Println(http.ListenAndServe(<span class="string">"localhost:6060"</span>, <span class="literal">nil</span>))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过 stdout 查看</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"os"</span></span><br><span class="line">    <span class="string">"runtime/pprof"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">pprof.Lookup(<span class="string">"goroutine"</span>).WriteTo(os.Stdout, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+</li>
+<li><p>gops</p>
+<blockquote>
+<p><a href="https://github.com/google/gops" rel="external nofollow noopener noreferrer" target="_blank">https://github.com/google/gops</a></p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"github.com/google/gops/agent"</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := agent.Start(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    log.Fatal(err)</span><br><span class="line">&#125;</span><br><span class="line">time.Sleep(time.Hour)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>leaktest</p>
+<blockquote>
+<p><a href="https://github.com/fortytw2/leaktest" rel="external nofollow noopener noreferrer" target="_blank">https://github.com/fortytw2/leaktest</a></p>
+</blockquote>
+<p>基本原理：在测试的开始和结束的时候，利用 runtime.Stack 获取活跃 goroutine 的堆栈跟踪。如果在测试完成后还有一些新的 goroutine，那么将其归类为泄露。</p>
+</li>
+</ol>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
+<li><a href="https://draveness.me/golang/concurrency/golang-sync-primitives.html" rel="external nofollow noopener noreferrer" target="_blank">同步原语与锁</a></li>
+<li><a href="https://juejin.im/post/5c1dce2d51882508506061f2#heading-10" rel="external nofollow noopener noreferrer" target="_blank">Golang非CSP并发模型外的其他并行方法总结</a></li>
+<li><a href="https://studygolang.com/articles/12495" rel="external nofollow noopener noreferrer" target="_blank">Goroutine 泄露</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: '打赏支持', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: '',
+  alipayImage: ''
+});
+</script>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/go/">go</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/使用-openresty-实现-grafana-免登录/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">使用 OpenResty 实现 Grafana 免登录</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="toc-sidebar">
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Go-并发编程-应用篇"><span class="nav-number">1.</span> <span class="nav-text">Go 并发编程-应用篇</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#同步原语"><span class="nav-number">1.1.</span> <span class="nav-text">同步原语</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mutex"><span class="nav-number">1.1.1.</span> <span class="nav-text">Mutex</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RWMutex"><span class="nav-number">1.1.2.</span> <span class="nav-text">RWMutex</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Once"><span class="nav-number">1.1.3.</span> <span class="nav-text">Once</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Atomic"><span class="nav-number">1.1.4.</span> <span class="nav-text">Atomic</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cond"><span class="nav-number">1.1.5.</span> <span class="nav-text">Cond</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WaitGroup"><span class="nav-number">1.1.6.</span> <span class="nav-text">WaitGroup</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据存储"><span class="nav-number">1.2.</span> <span class="nav-text">数据存储</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Map"><span class="nav-number">1.2.1.</span> <span class="nav-text">Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Pool"><span class="nav-number">1.2.2.</span> <span class="nav-text">Pool</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上下文-Context"><span class="nav-number">1.3.</span> <span class="nav-text">上下文 Context</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Channel"><span class="nav-number">1.4.</span> <span class="nav-text">Channel</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用场景"><span class="nav-number">1.4.1.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Select"><span class="nav-number">1.4.2.</span> <span class="nav-text">Select</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Goroutine-泄露"><span class="nav-number">1.4.3.</span> <span class="nav-text">Goroutine 泄露</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#常见场景"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">常见场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#泄露检测"><span class="nav-number">1.4.3.2.</span> <span class="nav-text">泄露检测</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">2.</span> <span class="nav-text">参考资料</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      
+      <footer id="footer">
+  
+
+  <div class="container">
+      	<div class="row">
+	      <p> Powered by <a href="http://hexo.io/" target="_blank" rel="external nofollow noopener noreferrer">Hexo</a> and <a href="https://github.com/iTimeTraveler/hexo-theme-hiker" target="_blank" rel="external nofollow noopener noreferrer">Hexo-theme-hiker</a> </p>
+	      <p id="copyRightEn">Copyright &copy; 2012 - 2019 Longford&#39;s Space All Rights Reserved.</p>
+        <p>
+本站所有文章采用<a rel="external nofollow noopener noreferrer" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a>进行许可。
+</p>
+	      
+    		<p class="busuanzi_uv">
+				访客数 : <span id="busuanzi_value_site_uv"></span> |
+				访问量 : <span id="busuanzi_value_site_pv"></span>
+		    </p>
+  		   
+        <p><a href="http://www.miitbeian.gov.cn" rel="external nofollow noopener noreferrer" target="_blank">豫ICP备13013159号</a> </p>
+		</div>
+
+
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var wrapdiv = document.getElementById("wrap");
+    var contentdiv = document.getElementById("content");
+    var allheader = document.getElementById("allheader");
+
+    wrapdiv.style.minHeight = document.body.offsetHeight + "px";
+    if (allheader != null) {
+      contentdiv.style.minHeight = document.body.offsetHeight - allheader.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    } else {
+      contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    }
+</script>
+
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tags</a>
+  
+    <a href="http://wiki.helongfei.com" class="mobile-nav-link" rel="external nofollow noopener noreferrer" target="_blank">Wiki</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+
+
+
+
+  <script src="/js/dialog.js"></script>
+
+
+
+
+
+
+
+
+	<div style="display: none;">
+    <script src="https://s95.cnzz.com/z_stat.php?id=1267343220&web_id=1267343220" language="JavaScript"></script>
+  </div>
+
+
+
+	<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+  </div>
+
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="myModalLabel">设置</h2>
+      </div>
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+
+
+      <div class="modal-body">
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" onclick="javascript:setFontSize();" aria-expanded="true" aria-controls="collapseOne">
+              正文字号大小
+            </a>
+          </div>
+          <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            您已调整页面字体大小
+          </div>
+        </div>
+      
+
+
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" onclick="javascript:setBackground();" aria-expanded="true" aria-controls="collapseTwo">
+              夜间护眼模式
+            </a>
+        </div>
+          <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="panel-body">
+            夜间模式已经开启，再次单击按钮即可关闭 
+          </div>
+        </div>
+
+        <div>
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;关 于&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+        </div>
+         <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+          <div class="panel-body">
+            Longford&#39;s Space
+          </div>
+          <div class="panel-body">
+            Copyright © 2019 贺龙飞 All Rights Reserved.
+          </div>
+        </div>
+      </div>
+
+
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <div class="modal-footer">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script>
+  
+    <a id="menu-switch"><i class="fa fa-bars fa-lg"></i></a>
+  
+</body>
