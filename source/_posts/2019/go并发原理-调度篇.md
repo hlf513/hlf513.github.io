@@ -101,6 +101,4 @@ Go scheduler 内部有三个重要的结构：M、P、G
 # 参考资料
 1. [Scalable Go Scheduler Design Doc](https://docs.google.com/document/d/1TTj4T2JO42uD5ID9e89oa0sLKhJYD0Y_kqxDv3I3XMw/)
 1. [Goroutine并发调度模型深度解析之手撸一个协程池](https://segmentfault.com/a/1190000015464889)
-2. [Go并发原理-贝壳](https://mp.weixin.qq.com/s?__biz=MzIyMTg0OTExOQ==&mid=2247484436&idx=2&sn=2864adc11a787c1c3ee79e8dbd96c27a&chksm=e8373764df40be72df5a6240998b19ab0ff45ac9a53a9e5c6b7ed0d7eabedd5a8098db9d87c2&mpshare=1&scene=1&srcid=07272kBJCM3KUJy3tfps1FdM%23rd)
-3. [Go 调度器: M, P 和 G](https://colobu.com/2017/05/04/go-scheduler/)
-4. [Go Runtime Scheduler](https://speakerdeck.com/retervision/go-runtime-scheduler)
+1. [Go Runtime Scheduler](https://speakerdeck.com/retervision/go-runtime-scheduler)
