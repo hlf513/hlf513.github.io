@@ -22,9 +22,9 @@
 <meta property="og:image" content="http://www.helongfei.com/images/2019/06/thread2.png">
 <meta property="og:image" content="http://www.helongfei.com/images/2019/06/thread1.png">
 <meta property="og:image" content="http://www.helongfei.com/images/2019/07/go-runtime.png">
-<meta property="og:image" content="http://www.helongfei.com/images/2019/06/mpg.png">
+<meta property="og:image" content="http://www.helongfei.com/images/2019/07/mpg.png">
 <meta property="og:image" content="http://www.helongfei.com/images/2019/06/go-scheduler2.png">
-<meta property="og:updated_time" content="2019-07-14T18:33:43.566Z">
+<meta property="og:updated_time" content="2019-07-14T19:01:15.378Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 并发原理 - 调度篇">
 <meta name="twitter:description" content="众所周知，Goroutine 是 Go 最小的执行单位，作为开发者，我们在使用「廉价」的 Goroutine 的时候，有没有想过背后的实现原理？有没有因为「滥用」Goroutine ，而踩过坑？我们今天来简要分析下 Go 的并发原理。">
@@ -248,23 +248,52 @@
 <ul>
 <li>M：OS 线程</li>
 <li>P：Go 代码执行所需要的资源</li>
-<li>G：Goroutine</li>
+<li>G：Goroutine<br><img src="/images/2019/07/mpg.png" alt="mpg"></li>
 </ul>
-<p><img src="/images/2019/06/mpg.png" alt="MPG"></p>
 <p>在 Go 1.0 的时候，它的调度器是 MG 模型，有以下几个问题：</p>
 <ol>
 <li>全局锁 (每个 Goroutine 的操作都要上锁)</li>
 <li>M 直接和 G 交互，导致调度延迟、性能损耗（OS 调度）</li>
 <li>每个 M 都有自己的 cache，导致内存占用过高</li>
-<li>系统调用形成的阻塞，导致性能呢损耗</li>
+<li>系统调用形成的阻塞，导致性能损耗</li>
 </ol>
 <p>为了解决以上几个问题，在 Go 1.1 的时候，引入了 P，并实现了 <a href="http://supertech.csail.mit.edu/papers/steal.pdf" rel="external nofollow noopener noreferrer" target="_blank">work stealing</a> 调度算法，演进为现在的 MPG 模型。</p>
+<p>Go 1.2 又加入了抢占式调度（sysmon），防止 goroutine 饿死。</p>
 <h3 id="MPG-模型"><a href="#MPG-模型" class="headerlink" title="MPG 模型"></a>MPG 模型</h3><p><img src="/images/2019/06/go-scheduler2.png" alt="Go scheduler2"></p>
+<p><strong>sysmon</strong></p>
+<blockquote>
+<p>监控线程</p>
+</blockquote>
+<p>主要作用：</p>
+<ul>
+<li>监控间隔：20us ~ 10ms</li>
+<li>抢占式调度<ul>
+<li>All P</li>
+<li>Syscall 20us ~10ms</li>
+<li>M、P 分离，P 绑定新的 M</li>
+</ul>
+</li>
+<li>Checkdead</li>
+<li>GC</li>
+</ul>
+<p><strong>findrunnable</strong></p>
+<blockquote>
+<p>获取可运行的 G，会阻塞直到找到 G</p>
+</blockquote>
+<p>执行步骤如下：</p>
+<ol>
+<li>若需 GC 则 stopm(6)</li>
+<li>从 local queue 获取 G</li>
+<li>从 global queue 获取 G</li>
+<li>从 netpoll 获取 G</li>
+<li>执行 stealing，随机偷一个 P 的一半 G</li>
+<li>执行 stopm</li>
+<li>重新从 1 开始执行</li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这里只是很简单的描述了调度的流程，里面的细节并未深入；所以要想真正理解，最好的方式还是看一遍源码。</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
 <li><a href="https://docs.google.com/document/d/1TTj4T2JO42uD5ID9e89oa0sLKhJYD0Y_kqxDv3I3XMw/" rel="external nofollow noopener noreferrer" target="_blank">Scalable Go Scheduler Design Doc</a></li>
 <li><a href="https://segmentfault.com/a/1190000015464889" rel="external nofollow noopener noreferrer" target="_blank">Goroutine并发调度模型深度解析之手撸一个协程池</a></li>
-<li><a href="https://mp.weixin.qq.com/s?__biz=MzIyMTg0OTExOQ==&amp;mid=2247484436&amp;idx=2&amp;sn=2864adc11a787c1c3ee79e8dbd96c27a&amp;chksm=e8373764df40be72df5a6240998b19ab0ff45ac9a53a9e5c6b7ed0d7eabedd5a8098db9d87c2&amp;mpshare=1&amp;scene=1&amp;srcid=07272kBJCM3KUJy3tfps1FdM%23rd" rel="external nofollow noopener noreferrer" target="_blank">Go并发原理-贝壳</a></li>
-<li><a href="https://colobu.com/2017/05/04/go-scheduler/" rel="external nofollow noopener noreferrer" target="_blank">Go 调度器: M, P 和 G</a></li>
 <li><a href="https://speakerdeck.com/retervision/go-runtime-scheduler" rel="external nofollow noopener noreferrer" target="_blank">Go Runtime Scheduler</a></li>
 </ol>
 
@@ -321,7 +350,7 @@ var a = new Donate({
     <div id="toc" class="toc-article">
     <strong class="toc-title">文章目录</strong>
     
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景知识"><span class="nav-number">1.</span> <span class="nav-text">背景知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程模型"><span class="nav-number">1.1.</span> <span class="nav-text">线程模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内核级线程模型"><span class="nav-number">1.1.1.</span> <span class="nav-text">内核级线程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户级线程模型"><span class="nav-number">1.1.2.</span> <span class="nav-text">用户级线程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两级-混合型-线程模型"><span class="nav-number">1.1.3.</span> <span class="nav-text">两级(混合型)线程模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSP-并发模型"><span class="nav-number">1.2.</span> <span class="nav-text">CSP 并发模型</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Runtime"><span class="nav-number">2.</span> <span class="nav-text">Runtime</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Goroutine"><span class="nav-number">2.1.</span> <span class="nav-text">Goroutine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduler"><span class="nav-number">2.2.</span> <span class="nav-text">Scheduler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">2.2.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MPG-模型"><span class="nav-number">2.2.2.</span> <span class="nav-text">MPG 模型</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景知识"><span class="nav-number">1.</span> <span class="nav-text">背景知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程模型"><span class="nav-number">1.1.</span> <span class="nav-text">线程模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内核级线程模型"><span class="nav-number">1.1.1.</span> <span class="nav-text">内核级线程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户级线程模型"><span class="nav-number">1.1.2.</span> <span class="nav-text">用户级线程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两级-混合型-线程模型"><span class="nav-number">1.1.3.</span> <span class="nav-text">两级(混合型)线程模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSP-并发模型"><span class="nav-number">1.2.</span> <span class="nav-text">CSP 并发模型</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Runtime"><span class="nav-number">2.</span> <span class="nav-text">Runtime</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Goroutine"><span class="nav-number">2.1.</span> <span class="nav-text">Goroutine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scheduler"><span class="nav-number">2.2.</span> <span class="nav-text">Scheduler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">2.2.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MPG-模型"><span class="nav-number">2.2.2.</span> <span class="nav-text">MPG 模型</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol>
     
     </div>
   </aside>
