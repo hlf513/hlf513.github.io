@@ -174,6 +174,61 @@
         
           <section id="main" style="float:none;">
   
+    <article id="post-2019/通过源码学习-go-的生命周期" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div id="articleInner" class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" itemprop="name">
+      <a class="article-title" href="/2019/通过源码学习-go-的生命周期/">通过源码学习 Go 的生命周期</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2019/通过源码学习-go-的生命周期/" class="article-date">
+	  <time datetime="2019-07-14T08:26:00.000Z" itemprop="datePublished">2019-07-14</time>
+	</a>
+
+      
+    <a class="article-category-link" href="/categories/go/">go</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>当我们学习一个新事物时，一定要做到「知其然知其所以然」。最近看了一些 go 的源码，对 go 的设计有了更深的认识，也让自己在工作中使用的更得心应手。</p>
+        <!-- 当我们学习一个新事物时，一定要做到「知其然知其所以然」。最近看了一些 go 的源码，对 go 的设计有了更深的认识，也让自己在工作中使用的更得心应手。
+
+本文基于以下版本：1go version go1.12.7 darwin/amd64
+四个重要结构首先，我们了解下这四个核心的 struct，有助于帮助我们理解下文。
+schedt
+src/runtime/runtime2.go
+
+1234......  -->
+        <p class="article-more-link">
+          <a href="/2019/通过源码学习-go-的生命周期/#more">阅读全文</a>
+        </p>
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/go/">go</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+<!-- Table of Contents -->
+
+  
     <article id="post-2019/go-并发编程-应用篇" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div id="articleInner" class="article-inner">
     
@@ -252,8 +307,8 @@
     </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。<br>
-        <!-- 概述公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。<br>
+        <!-- 背景公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。
 问题假设，只有一个 token ，通过这个 token 可以获取到用户信息，在这种情况下，怎么可以免登录进入 Grafana？
 例：访问：http://grafana.com?token=xxxxxxx 后，不应该跳转到 http://grafana.com/login ......  -->
         </p><p class="article-more-link">

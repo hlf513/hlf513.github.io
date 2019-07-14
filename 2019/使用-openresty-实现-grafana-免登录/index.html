@@ -11,19 +11,19 @@
   
   
   
-  <meta name="description" content="概述公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。">
+  <meta name="description" content="背景公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。">
 <meta name="keywords" content="grafana,openresty,lua">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用 OpenResty 实现 Grafana 免登录">
 <meta property="og:url" content="http://www.helongfei.com/2019/使用-openresty-实现-grafana-免登录/index.html">
 <meta property="og:site_name" content="Longford&#39;s Space">
-<meta property="og:description" content="概述公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。">
+<meta property="og:description" content="背景公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://www.helongfei.com/images/2019/06/grafana-login.png">
-<meta property="og:updated_time" content="2019-06-21T10:22:25.483Z">
+<meta property="og:updated_time" content="2019-07-14T08:34:01.604Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 OpenResty 实现 Grafana 免登录">
-<meta name="twitter:description" content="概述公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。">
+<meta name="twitter:description" content="背景公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。">
 <meta name="twitter:image" content="http://www.helongfei.com/images/2019/06/grafana-login.png">
   
     <link rel="alternate" href="/atom.xml" title="Longford&#39;s Space" type="application/atom+xml">
@@ -198,7 +198,7 @@
     </div>
     <div class="article-entry" itemprop="articleBody">
       
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。<br><a id="more"></a></p>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>公司内部都有管理后台，一般都会把第三方软件集成到后台，收敛登录入口。 本文主要介绍一种集成 Grafana 的方法。<br><a id="more"></a></p>
 <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>假设，只有一个 <code>token</code> ，通过这个 <code>token</code> 可以获取到用户信息，在这种情况下，怎么可以免登录进入 <code>Grafana</code>？</p>
 <p>例：访问：<a href="http://grafana.com?token=xxxxxxx" rel="external nofollow noopener noreferrer" target="_blank">http://grafana.com?token=xxxxxxx</a> 后，不应该跳转到 <a href="http://grafana.com/login" rel="external nofollow noopener noreferrer" target="_blank">http://grafana.com/login</a> ，而应该直接进入 <a href="http://grafana.com/home" rel="external nofollow noopener noreferrer" target="_blank">http://grafana.com/home</a></p>
 <h1 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h1><p>通过查看<a href="https://grafana.com/docs/auth/overview/" rel="external nofollow noopener noreferrer" target="_blank">文档</a>，可以发现 <code>Grafana</code> 支持多种权限认证；但没有一个能完美解决我们问题的方案；唯一比较接近的是 <code>Auth Proxy</code>，说是可以在 <code>Grafana</code> 外部进行权限验证，经过通读文档和试验，发现其本质是：通过 web server 校验后，在每个请求上增加一个 header (默认 <code>X-WEBAUTH-USER</code>)来实现免登录；文档中的示例是通过 <code>htpasswd</code> 来实现的权限验证，那自然想到可以通过 <code>OpenResty</code> 进行权限校验。</p>
@@ -265,7 +265,7 @@ var a = new Donate({
     <div id="toc" class="toc-article">
     <strong class="toc-title">文章目录</strong>
     
-        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本思路"><span class="nav-number">3.</span> <span class="nav-text">基本思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现细节"><span class="nav-number">4.</span> <span class="nav-text">实现细节</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Auth-Proxy"><span class="nav-number">4.1.</span> <span class="nav-text">Auth Proxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenResty"><span class="nav-number">4.2.</span> <span class="nav-text">OpenResty</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol>
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本思路"><span class="nav-number">3.</span> <span class="nav-text">基本思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实现细节"><span class="nav-number">4.</span> <span class="nav-text">实现细节</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Auth-Proxy"><span class="nav-number">4.1.</span> <span class="nav-text">Auth Proxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenResty"><span class="nav-number">4.2.</span> <span class="nav-text">OpenResty</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol>
     
     </div>
   </aside>
