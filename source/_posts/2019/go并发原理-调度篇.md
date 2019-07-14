@@ -64,7 +64,7 @@ Go 其实只用到了 CSP 的很小一部分，即理论中的 Process/Channel�
 
 Go 编译器会在 Go 运行时的一些地方插入系统调用，（比如通过 channel 发送值,调用 runtime 包等），所以 Go 可以通知调度器执行特定的操作。
 
-![go scheduler1](/images/2019/06/go-scheduler1.png)
+![go-runtime](/images/2019/07/go-runtime.png)
 
 ## Goroutine
 在 Golang 中，任何代码都是运行在 goroutine 里，即便没有显式的 `go func()` ，默认的 main 函数也是一个 goroutine。
