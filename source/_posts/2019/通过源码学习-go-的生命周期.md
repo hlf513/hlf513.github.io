@@ -412,6 +412,12 @@ func main(){
 		maxstacksize = 250000000
 	}
 
+  if GOARCH != "wasm" { // no threads on wasm yet, so no sysmon
+    // 开启 sysmon 监控线程，若 P 处于 syscall，则获取一个 M 拿走 P 下的 G
+		systemstack(func() {
+			newm(sysmon, nil)
+		})
+	}
 	// ...
 
 	// 执行用户的 init()
