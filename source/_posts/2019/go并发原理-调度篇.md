@@ -81,22 +81,49 @@ Go scheduler 内部有三个重要的结构：M、P、G
 * M：OS 线程
 * P：Go 代码执行所需要的资源
 * G：Goroutine
-
-![MPG](/images/2019/06/mpg.png)
+![mpg](/images/2019/07/mpg.png)
 
 在 Go 1.0 的时候，它的调度器是 MG 模型，有以下几个问题：
 
 1. 全局锁 (每个 Goroutine 的操作都要上锁)
 2. M 直接和 G 交互，导致调度延迟、性能损耗（OS 调度）
 3. 每个 M 都有自己的 cache，导致内存占用过高
-4. 系统调用形成的阻塞，导致性能呢损耗
+4. 系统调用形成的阻塞，导致性能损耗
 
 为了解决以上几个问题，在 Go 1.1 的时候，引入了 P，并实现了 [work stealing](http://supertech.csail.mit.edu/papers/steal.pdf) 调度算法，演进为现在的 MPG 模型。
+
+Go 1.2 又加入了抢占式调度（sysmon），防止 goroutine 饿死。
 
 ### MPG 模型
 
 ![Go scheduler2](/images/2019/06/go-scheduler2.png)
 
+**sysmon**
+> 监控线程
+
+主要作用：
+* 监控间隔：20us ~ 10ms
+* 抢占式调度
+  - All P
+  - Syscall 20us ~10ms
+  - M、P 分离，P 绑定新的 M
+* Checkdead
+* GC
+
+**findrunnable**
+> 获取可运行的 G，会阻塞直到找到 G
+
+执行步骤如下：
+1. 若需 GC 则 stopm(6)
+2. 从 local queue 获取 G
+3. 从 global queue 获取 G
+4. 从 netpoll 获取 G
+5. 执行 stealing，随机偷一个 P 的一半 G
+6. 执行 stopm
+7. 重新从 1 开始执行
+
+# 总结
+这里只是很简单的描述了调度的流程，里面的细节并未深入；所以要想真正理解，最好的方式还是看一遍源码。
 
 # 参考资料
 1. [Scalable Go Scheduler Design Doc](https://docs.google.com/document/d/1TTj4T2JO42uD5ID9e89oa0sLKhJYD0Y_kqxDv3I3XMw/)
