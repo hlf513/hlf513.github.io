@@ -84,7 +84,7 @@ local function getToken()
     return token
 end
 
-function conRedis(ip, port)
+local function conRedis(ip, port)
     local red = redis.new()
     local ok, err = red:connect(ip, port)
     red:set_timeout(1000) -- 1s
@@ -111,7 +111,7 @@ local function getUsernameByRedis(token)
 end
 
 -- 使用 url 鉴权
-function getUsernameByUrl(token)
+local function getUsernameByUrl(token)
     local uri = "/proxy/get-user-info" -- 这里接口地址按实际情况进行修改
     --ngx.req.set_header("X-TOKEN", token)
     res = ngx.location.capture(uri, {
@@ -131,7 +131,7 @@ function getUsernameByUrl(token)
     end
 end
 
-function closeRedis(redis)
+local function closeRedis(redis)
     local ok, err = redis:close()
     if not ok then
         ngx.log(ngx.ERR, 'close redis connect fail')
@@ -154,25 +154,25 @@ local function getUsernameByCookie()
     return decrypt(token)
 end
 
-local function logout()
+local function init()
     if ngx.re.match(ngx.var.request_uri, "logout") then
         ngx.header['Set-Cookie'] = { 'token=' }
     end
 end
 
-function encrypt(encryptString)
+local function encrypt(encryptString)
     local aes_128_cbc_md5 = aes:new("AKeyForAES")
     return ngx.encode_base64(aes_128_cbc_md5:encrypt(encryptString))
 end
 
-function decrypt(decryptString)
+local function decrypt(decryptString)
     local aes_128_cbc_md5 = aes:new("AKeyForAES")
     local decrypt = ngx.decode_base64(decryptString)
     return aes_128_cbc_md5:decrypt(decrypt)
 end
 
 -- main
-logout()
+init()
 
 local token = getToken()
 if token then
