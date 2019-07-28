@@ -3,7 +3,6 @@ layout: post
 title: CI 框架总结
 date: '2016-03-27 03:09:54 +0800'
 tags:
-  - php
   - CI
 categories:
   - PHP
@@ -16,7 +15,7 @@ categories:
 使用 &get_instance(); 可以引用所有已加载的类。
 <!-- more -->
 # 中文手册
-http://codeigniter.org.cn/userguide2/index.html  
+http://codeigniter.org.cn/userguide2/index.html
 # 框架运行图解
 
 ## 运行流程图
@@ -52,7 +51,7 @@ http://codeigniter.org.cn/userguide2/index.html
 	class CI_controller{}
 	{% endcodeblock %}
 
-## 使用/新建/替换/扩展类库  
+## 使用/新建/替换/扩展类库
 
 1. 使用内置
 
@@ -60,11 +59,11 @@ http://codeigniter.org.cn/userguide2/index.html
 	$this->load->library('name');
 	{% endcodeblock %}
 
-2. 建立新的类  
+2. 建立新的类
 	在 applicatioin/libraries 目录下
 3. 扩展已有类
-	在 applicatioin/libraries 目录下，使用定义好的子类前缀，并继承父类  
-	比如扩展 email：  
+	在 applicatioin/libraries 目录下，使用定义好的子类前缀，并继承父类
+	比如扩展 email：
 
 	{% codeblock lang:php %}
 	class MY_Email extends CI_Email{}

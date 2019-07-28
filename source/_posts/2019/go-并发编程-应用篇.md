@@ -3,9 +3,9 @@ layout: "post"
 title: "Go 并发编程-应用篇"
 date: "2019-07-12 01:16"
 tags:
-  - go
+  - 并发编程
 categories:
-  - go
+  - Go
 ---
 当提到并发编程的时候，人们往往会想到多线程，而 Go 最被人熟知的是借鉴 CSP 的 gorountine & channel 并发模式，那 Go 中是否支持类似传统多线程的并发编程方式呢？答案是支持；因为 Go 的 Sync 包给我们提供了互斥锁、原子操作、条件变量等同步原语。
 

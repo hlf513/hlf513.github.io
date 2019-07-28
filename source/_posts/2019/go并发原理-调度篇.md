@@ -3,11 +3,11 @@ layout: post
 title: Go 并发原理 - 调度篇
 date: '2019-07-14 10:02'
 tags:
-  - go
   - runtime
   - scheduler
+  - 并发原理
 categories:
-  - Go runtime
+  - Go
 ---
 
 众所周知，`Goroutine` 是 Go 最小的执行单位，作为开发者，我们在使用「廉价」的 `Goroutine` 的时候，有没有想过背后的实现原理？有没有因为「滥用」`Goroutine` ，而踩过坑？我们今天来简要分析下 Go 的并发原理。

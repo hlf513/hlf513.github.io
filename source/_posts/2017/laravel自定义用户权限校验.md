@@ -5,7 +5,6 @@ date: '2017-12-30 00:05'
 categories:
   - PHP
 tags:
-  - php
   - laravel
 ---
 
