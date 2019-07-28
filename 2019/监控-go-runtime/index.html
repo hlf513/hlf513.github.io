@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>监控 go runtime | Longford&#39;s Space</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="keywords" content="grafanaruntimegraphite">
+  
+  
+  
+  
+  <meta name="description" content="GO 通常作为守护进程存在，若我们不做任何监控，放任其「自由」的使用资源，那有可能会发现意外情况，比如「Goroutine 泄露」。那我们应该如何监控，又要监控哪些指标呢？">
+<meta name="keywords" content="grafana,runtime,graphite">
+<meta property="og:type" content="article">
+<meta property="og:title" content="监控 Go Runtime">
+<meta property="og:url" content="http://www.helongfei.com/2019/监控-go-runtime/index.html">
+<meta property="og:site_name" content="Longford&#39;s Space">
+<meta property="og:description" content="GO 通常作为守护进程存在，若我们不做任何监控，放任其「自由」的使用资源，那有可能会发现意外情况，比如「Goroutine 泄露」。那我们应该如何监控，又要监控哪些指标呢？">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.helongfei.com/images/2019/07/架构图.png">
+<meta property="og:image" content="http://www.helongfei.com/images/2019/07/graphite-架构图.png">
+<meta property="og:updated_time" content="2019-07-28T15:44:40.633Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="监控 Go Runtime">
+<meta name="twitter:description" content="GO 通常作为守护进程存在，若我们不做任何监控，放任其「自由」的使用资源，那有可能会发现意外情况，比如「Goroutine 泄露」。那我们应该如何监控，又要监控哪些指标呢？">
+<meta name="twitter:image" content="http://www.helongfei.com/images/2019/07/架构图.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Longford&#39;s Space" type="application/atom+xml">
+  
+
+  
+
+  <link rel="icon" href="/css/images/mylogo.jpg">
+  <link rel="apple-touch-icon" href="/css/images/mylogo.jpg">
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Montserrat:700" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic" rel="stylesheet" type="text/css">
+  <link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <style type="text/css">
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/9749f0/00000000000000000001008f/27/l?subset_id=2&fvd=n5) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/90cf9f/000000000000000000010091/27/l?subset_id=2&fvd=n7) format("woff2");font-weight:500;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/8a5494/000000000000000000013365/27/l?subset_id=2&fvd=n4) format("woff2");font-weight:lighter;font-style:normal;}
+    @font-face{font-family:futura-pt;src:url(https://use.typekit.net/af/d337d8/000000000000000000010095/27/l?subset_id=2&fvd=i4) format("woff2");font-weight:400;font-style:italic;}</style>
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="/js/jquery-3.1.1.min.js"></script>
+  <script src="/js/bootstrap.js"></script>
+
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="/css/bootstrap.css">
+
+  
+    <link rel="stylesheet" href="/css/dialog.css">
+  
+
+  
+
+  
+    <link rel="stylesheet" href="/css/header-post.css">
+  
+
+  
+  
+  
+    <link rel="stylesheet" href="/css/vdonate.css">
+  
+
+</head>
+</html>
+
+
+  <body data-spy="scroll" data-target="#toc" data-offset="50">
+
+
+  
+  <div id="container">
+    <div id="wrap">
+      
+        <header>
+
+    <div id="allheader" class="navbar navbar-default navbar-static-top" role="navigation">
+        <div class="navbar-inner">
+          
+          <div class="container"> 
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+
+            
+              <a class="brand" style="
+                 margin-top: 0px;" href="#" data-toggle="modal" data-target="#myModal">
+                  <img width="124px" height="124px" alt="Hike News" src="/css/images/mylogo.jpg">
+              </a>
+            
+            
+            <div class="navbar-collapse collapse">
+              <ul class="hnav navbar-nav">
+                
+                  <li> <a class="main-nav-link" href="/">首页</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/archives">归档</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/categories">分类</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/tags">标签</a> </li>
+                
+                  <li> <a class="main-nav-link" href="http://wiki.helongfei.com" rel="external nofollow noopener noreferrer" target="_blank">知识库</a> </li>
+                
+                  <li> <a class="main-nav-link" href="/about">关于</a> </li>
+                
+                  <li><div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="">
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词...">
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(无标题)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div></li>
+            </ul></div>
+          </div>
+                
+      </div>
+    </div>
+
+</header>
+
+
+
+      
+            
+      <div id="content" class="outer">
+        
+          <section id="main" style="float:none;"><article id="post-2019/监控-go-runtime" style="width: 75%; float:left;" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div id="articleInner" class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" itemprop="name">
+      监控 Go Runtime
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2019/监控-go-runtime/" class="article-date">
+	  <time datetime="2019-07-27T20:02:00.000Z" itemprop="datePublished">2019-07-28</time>
+	</a>
+
+      
+    <a class="article-category-link" href="/categories/Go/">Go</a><a class="article-category-link" href="/categories/Go/监控/">监控</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/hint.css/2.4.1/hint.min.css"><p>GO 通常作为守护进程存在，若我们不做任何监控，放任其「自由」的使用资源，那有可能会发现意外情况，比如「Goroutine 泄露」。那我们应该如何监控，又要监控哪些指标呢？</p>
+<a id="more"></a>
+<h1 id="监控指标"><a href="#监控指标" class="headerlink" title="监控指标"></a>监控指标</h1><p>监控的核心是监控指标，「有用」的指标才是有意义，那 Go 有哪些有意义的指标呢？</p>
+<p>我认为只要监控<code>go runtime</code> 相关的指标就行，整体分为两大类：</p>
+<ol>
+<li>CPU：goroutine、cgo</li>
+<li>内存：gc、heap、stack</li>
+</ol>
+<h1 id="监控架构"><a href="#监控架构" class="headerlink" title="监控架构"></a>监控架构</h1><p>既然确定了监控指标，那如何监控呢？这里要感谢 Brian Hatfield 开源的 <a href="https://github.com/bmhatfield/go-runtime-metrics" rel="external nofollow noopener noreferrer" target="_blank">go-runtime-metrics</a>，我们可以利用它快速的搭建监控系统。</p>
+<p>整体架构如下：<br><img src="/images/2019/07/架构图.png" alt="Go runtime 监控架构图"></p>
+<p>由图可知，我们使用了<code>Grafana</code>，<code>Graphite</code>，<code>Statsd</code>；其中<code>Statsd</code>是和运行程序部署在一起的，默认是10s 上报一次，对性能的影响不是太大，真的出现瓶颈的时候，可以再抽离；<code>Graphite</code> 是包含图表的；这里使用的是 <code>Grafana</code> 集成 <code>Graphite</code>。</p>
+<h2 id="Go-runtime-metric"><a href="#Go-runtime-metric" class="headerlink" title="Go-runtime-metric"></a>Go-runtime-metric</h2><blockquote>
+<p><a href="https://github.com/bmhatfield/go-runtime-metrics" rel="external nofollow noopener noreferrer" target="_blank">https://github.com/bmhatfield/go-runtime-metrics</a></p>
+</blockquote>
+<p>工作原理：</p>
+<ol>
+<li>程序启动后，开启一个 <code>goroutine</code> 采集上报 <code>metric</code>，数据收集使用 <code>statsd</code>，传输协议采用 <code>UDP</code></li>
+<li>在 <code>main</code>函数中使用 <code>flag.Parse()</code> 才会打开采集上报（上报服务地址等通过命令行参数修改）</li>
+<li>采样率 100%，且不可修改（可以自己 fork 后修改）</li>
+<li>上报间隔 10s，可通过命令行<code>--pause</code>修改</li>
+<li>使用的 metric type 是 <code>Gauges</code></li>
+<li>所有的采集项都是通过 <code>runtime</code> 包完成的；统计 <code>mem</code> 时，会触发 <code>STW</code>（若关心性能，建议关闭统计 <code>mem</code>）</li>
+</ol>
+<p>可用参数：<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">--statsd=localhost:8125 <span class="comment"># Statsd host:port</span></span><br><span class="line">--metric-prefix <span class="comment"># Metric prefix path；用于区分机器/应用等</span></span><br><span class="line">--pause=10 <span class="comment"># 上报间隔；default 10s</span></span><br><span class="line">--publish-runtime-stats=<span class="literal">true</span> <span class="comment"># 是否采集 go runtime；采集总开关</span></span><br><span class="line">--cpu <span class="comment"># 是否采集 CPU</span></span><br><span class="line">--mem <span class="comment"># 是否采集 mem</span></span><br><span class="line">--gc <span class="comment"># 是否采集 GC (必须开启 --mem)</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Statsd"><a href="#Statsd" class="headerlink" title="Statsd"></a>Statsd</h2><blockquote>
+<p><a href="https://github.com/statsd/statsd" rel="external nofollow noopener noreferrer" target="_blank">https://github.com/statsd/statsd</a></p>
+</blockquote>
+<p>基于 node.js 实现，用于收集 metric 数据，支持 UDP、TCP 协议，默认每 10s 向后端发送一次数据，支持集群部署。支持的 <a href="https://github.com/statsd/statsd/blob/master/docs/metric_types.md" rel="external nofollow noopener noreferrer" target="_blank">metric type</a> 有 Counting、Sampling、Timing、Gauges。支持多种 <a href="https://github.com/statsd/statsd/blob/master/docs/backend.md" rel="external nofollow noopener noreferrer" target="_blank">backend</a>，内置三个：<code>Graphite</code>,<code>Console</code>,<code>Repeater</code>，第三方见文档。</p>
+<p>启动前使用<code>run_tests.js</code> 检查下环境等问题。使用起来很简单，主要是两个配置文件：<code>exampleConfig.js</code>、<code>exampleProxyConfig.js</code>，前者用于单机部署，后者用于集群部署；详细配置含义见文件内容注释。</p>
+<p>使用<code>Graphite</code>示例：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 单机部署</span></span><br><span class="line">&#123;</span><br><span class="line">  graphitePort: <span class="number">2003</span></span><br><span class="line">, <span class="attr">graphiteHost</span>: <span class="string">"localhost"</span></span><br><span class="line">, <span class="attr">port</span>: <span class="number">8125</span></span><br><span class="line">, <span class="attr">server</span>: <span class="string">"./servers/udp"</span></span><br><span class="line">, <span class="attr">debug</span>: <span class="literal">true</span></span><br><span class="line">, <span class="attr">backends</span>: [ <span class="string">"./backends/console"</span>, <span class="string">"./backends/graphite"</span> ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="Graphite"><a href="#Graphite" class="headerlink" title="Graphite"></a>Graphite</h2><blockquote>
+<p><a href="http://graphiteapp.org/" rel="external nofollow noopener noreferrer" target="_blank">http://graphiteapp.org/</a></p>
+</blockquote>
+<p>Graphite 主要作用是保存 metric 数据，并将其可视化。内置三个组件：</p>
+<ol>
+<li>carbon：监听时间序列数据（守护进程）</li>
+<li>whisper：存储时间序列数据（数据存储-类似 RRD）</li>
+<li>graphite-webapp：渲染时间序列数据，提供 Web &amp; API（Web 应用）</li>
+</ol>
+<p>架构图如下：<br><img src="/images/2019/07/graphite-架构图.png" alt="graphite 架构图"></p>
+<h3 id="Carbon"><a href="#Carbon" class="headerlink" title="Carbon"></a>Carbon</h3><p>Carbon 主要是监听并处理 metric 。</p>
+<h4 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h4><blockquote>
+<p><a href="https://graphite.readthedocs.io/en/latest/config-carbon.html" rel="external nofollow noopener noreferrer" target="_blank">https://graphite.readthedocs.io/en/latest/config-carbon.html</a></p>
+</blockquote>
+<p>包含多个 conf（默认在 /opt/graphite/conf）：</p>
+<ol>
+<li><p><strong>carbon.conf</strong><br>主要是三个 sectoion：[cache] 缓存、[relay] 转发、[aggregator] 聚合</p>
+</li>
+<li><p><strong>storage-schemas.conf</strong><br>主要是存储周期设置。修改后不会立即生效，需要执行下<code>whisper-resize.py</code></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[apache_busyWorkers]</span></span><br><span class="line"><span class="attr">pattern</span> = ^servers\.www.*\.workers\.busyWorkers$</span><br><span class="line"><span class="comment"># 15s 一个点，存 7 天；1m 一个点，存 21 天...</span></span><br><span class="line"><span class="attr">retentions</span> = <span class="number">15</span>s:<span class="number">7</span>d,<span class="number">1</span>m:<span class="number">21</span>d,<span class="number">15</span>m:<span class="number">5</span>y</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>storage-aggregation.conf</strong><br>主要是多个相同 metric 聚合 metric，修改后不会立即生效，需要执行<code>whisper-set-aggregation-method.py *.wsp &lt;method&gt;</code></p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[all_min]</span></span><br><span class="line"><span class="attr">pattern</span> = \.min$</span><br><span class="line"><span class="comment"># 上一个 retention level 至少含有下一个 level 的 10% 的值</span></span><br><span class="line"><span class="attr">xFilesFactor</span> = <span class="number">0.1</span></span><br><span class="line"><span class="comment"># 聚合方法</span></span><br><span class="line"><span class="attr">aggregationMethod</span> = min</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>relay-rules.conf</strong><br>主要是转发数据</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[example]</span></span><br><span class="line"><span class="attr">pattern</span> = ^mydata\.foo\..+</span><br><span class="line"><span class="attr">servers</span> = <span class="number">10.1</span>.<span class="number">2.3</span>, <span class="number">10.1</span>.<span class="number">2.4</span>:<span class="number">2004</span>, myserver.mydomain.com</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>aggregation-rules.conf</strong><br>主要是根据 rule、method，对 metric 进行聚合操作</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">output_template (frequency) = method input_pattern</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>rewrite-rules.conf</strong><br>根据 rule 对 metric 进行重命名</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">regex-pattern = replacement-text</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>whitelist.conf</strong><br>设置 metric 白名单</p>
+</li>
+<li><p><strong>blacklist.conf</strong><br>设置 metric 黑名单</p>
+</li>
+</ol>
+<h4 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h4><p><strong>单机</strong></p>
+<blockquote>
+<p><a href="https://graphite.readthedocs.io/en/latest/admin-carbon.html" rel="external nofollow noopener noreferrer" target="_blank">https://graphite.readthedocs.io/en/latest/admin-carbon.html</a></p>
+</blockquote>
+<p>使用 <code>carbon-cache.py</code>，相关配置：carbon.conf、storage-schemas.conf<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/opt/graphite/bin/carbon-cache.py start</span><br></pre></td></tr></table></figure></p>
+<p>若有性能问题，可以在运行<code>carbon-cache.py</code>之前使用<code>carbon-aggregator.py</code>，对数据进行聚合，减少数据量。相关配置：carbon.conf、aggregation-rules.conf</p>
+<p><strong>集群</strong></p>
+<blockquote>
+<p><a href="https://graphite.readthedocs.io/en/latest/carbon-daemons.html" rel="external nofollow noopener noreferrer" target="_blank">https://graphite.readthedocs.io/en/latest/carbon-daemons.html</a></p>
+</blockquote>
+<p>使用 <code>carbon-relay.py</code>，主要作用是复制和分片。相关配置：carbon.conf、relay-rules.conf<br>也可以使用<code>carbon-aggregator-cache.py</code>,它合并了<code>carbon-aggregator.py</code>和<code>carbon-cache.py</code>两个脚本，相关配置：carbon.conf、relay-rules.conf、aggregation-rules.conf</p>
+<h3 id="Graphite-web"><a href="#Graphite-web" class="headerlink" title="Graphite-web"></a>Graphite-web</h3><p>使用 Django 开发。</p>
+<h4 id="配置-1"><a href="#配置-1" class="headerlink" title="配置"></a>配置</h4><blockquote>
+<p><a href="https://graphite.readthedocs.io/en/latest/config-local-settings.html" rel="external nofollow noopener noreferrer" target="_blank">https://graphite.readthedocs.io/en/latest/config-local-settings.html</a></p>
+</blockquote>
+<p>这里的 database 主要是存储用户、dashboard 等信息。默认使用 SQLite。</p>
+<h4 id="启动-1"><a href="#启动-1" class="headerlink" title="启动"></a>启动</h4><blockquote>
+<p><a href="https://graphite.readthedocs.io/en/latest/config-webapp.html" rel="external nofollow noopener noreferrer" target="_blank">https://graphite.readthedocs.io/en/latest/config-webapp.html</a></p>
+</blockquote>
+<p>配置 nginx + gunicorn</p>
+<h3 id="Whisper"><a href="#Whisper" class="headerlink" title="Whisper"></a>Whisper</h3><blockquote>
+<p><a href="https://graphite.readthedocs.io/en/latest/whisper.html" rel="external nofollow noopener noreferrer" target="_blank">https://graphite.readthedocs.io/en/latest/whisper.html</a></p>
+</blockquote>
+<p>存储时间序列数据，类似RRD，一个环形数据库。</p>
+<h1 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h1><p>本地学习环境安装，非高性能版安装。</p>
+<h2 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h2><ol>
+<li><p><strong>安装 Graphite + statsd</strong><br>使用 Docker 安装，推荐使用 Graphite 官方的 <a href="https://github.com/graphite-project/docker-graphite-statsd" rel="external nofollow noopener noreferrer" target="_blank">docker repo</a>，包含 Graphite &amp; statsd</p>
+</li>
+<li><p><strong>安装 Grafana</strong></p>
+</li>
+<li><strong>Go 工程代码</strong>中添加 <code>github.com/bmhatfield/go-runtime-metrics</code></li>
+</ol>
+<p>使用示例：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"flag"</span></span><br><span class="line">	<span class="string">"log"</span></span><br><span class="line">	<span class="string">"net/http"</span></span><br><span class="line">	<span class="string">"os"</span></span><br><span class="line"></span><br><span class="line">	_ <span class="string">"github.com/bmhatfield/go-runtime-metrics"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 打开采集</span></span><br><span class="line">	flag.Parse()</span><br><span class="line"></span><br><span class="line">	cwd, err := os.Getwd()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatal(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	srv := &amp;http.Server&#123;</span><br><span class="line">		Addr:    <span class="string">":8000"</span>, <span class="comment">// Normally ":443"</span></span><br><span class="line">		Handler: http.FileServer(http.Dir(cwd)),</span><br><span class="line">	&#125;</span><br><span class="line">	log.Fatal(srv.ListenAndServe())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
+<li><a href="http://graphiteapp.org/" rel="external nofollow noopener noreferrer" target="_blank">Graphite</a></li>
+<li><a href="https://github.com/statsd/statsd" rel="external nofollow noopener noreferrer" target="_blank">Statsd</a></li>
+<li><a href="https://github.com/bmhatfield/go-runtime-metrics" rel="external nofollow noopener noreferrer" target="_blank">Go-runtime-metric</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div id="donation_div"></div>
+
+<script src="/js/vdonate.js"></script>
+<script>
+var a = new Donate({
+  title: '如果觉得我的文章对您有用，请随意打赏。您的支持将鼓励我继续创作!', // 可选参数，打赏标题
+  btnText: '打赏支持', // 可选参数，打赏按钮文字
+  el: document.getElementById('donation_div'),
+  wechatImage: '',
+  alipayImage: ''
+});
+</script>
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/grafana/">grafana</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/graphite/">graphite</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/runtime/">runtime</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2019/通过源码学习-go-的生命周期/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">通过源码学习 Go 的生命周期</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+<!-- Table of Contents -->
+
+  <aside id="toc-sidebar">
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    
+        <ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#监控指标"><span class="nav-number">1.</span> <span class="nav-text">监控指标</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#监控架构"><span class="nav-number">2.</span> <span class="nav-text">监控架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Go-runtime-metric"><span class="nav-number">2.1.</span> <span class="nav-text">Go-runtime-metric</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Statsd"><span class="nav-number">2.2.</span> <span class="nav-text">Statsd</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Graphite"><span class="nav-number">2.3.</span> <span class="nav-text">Graphite</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Carbon"><span class="nav-number">2.3.1.</span> <span class="nav-text">Carbon</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">启动</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Graphite-web"><span class="nav-number">2.3.2.</span> <span class="nav-text">Graphite-web</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-1"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动-1"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">启动</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Whisper"><span class="nav-number">2.3.3.</span> <span class="nav-text">Whisper</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#部署"><span class="nav-number">3.</span> <span class="nav-text">部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装步骤"><span class="nav-number">3.1.</span> <span class="nav-text">安装步骤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol>
+    
+    </div>
+  </aside>
+</section>
+        
+      </div>
+      
+      <footer id="footer">
+  
+
+  <div class="container">
+      	<div class="row">
+	      <p> Powered by <a href="http://hexo.io/" target="_blank" rel="external nofollow noopener noreferrer">Hexo</a> and <a href="https://github.com/iTimeTraveler/hexo-theme-hiker" target="_blank" rel="external nofollow noopener noreferrer">Hexo-theme-hiker</a> </p>
+	      <p id="copyRightEn">Copyright &copy; 2012 - 2019 Longford&#39;s Space All Rights Reserved.</p>
+        <p>
+本站所有文章采用<a rel="external nofollow noopener noreferrer" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a>进行许可。
+</p>
+        <p><a href="http://www.miitbeian.gov.cn" rel="external nofollow noopener noreferrer" target="_blank">豫ICP备13013159号</a> </p>
+		</div>
+
+
+  </div>
+</footer>
+
+
+<!-- min height -->
+
+<script>
+    var wrapdiv = document.getElementById("wrap");
+    var contentdiv = document.getElementById("content");
+    var allheader = document.getElementById("allheader");
+
+    wrapdiv.style.minHeight = document.body.offsetHeight + "px";
+    if (allheader != null) {
+      contentdiv.style.minHeight = document.body.offsetHeight - allheader.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    } else {
+      contentdiv.style.minHeight = document.body.offsetHeight - document.getElementById("footer").offsetHeight + "px";
+    }
+</script>
+
+    </div>
+    <!-- <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tags</a>
+  
+    <a href="http://wiki.helongfei.com" class="mobile-nav-link" rel="external nofollow noopener noreferrer" target="_blank">Wiki</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav> -->
+    
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/scripts.js"></script>
+
+
+
+
+  <script src="/js/dialog.js"></script>
+
+
+
+
+
+
+
+
+	<div style="display: none;">
+    <script src="https://s95.cnzz.com/z_stat.php?id=1267343220&web_id=1267343220" language="JavaScript"></script>
+  </div>
+
+
+
+
+
+
+
+
+  </div>
+
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="myModalLabel">设置</h2>
+      </div>
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+
+
+      <div class="modal-body">
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" onclick="javascript:setFontSize();" aria-expanded="true" aria-controls="collapseOne">
+              正文字号大小
+            </a>
+          </div>
+          <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            您已调整页面字体大小
+          </div>
+        </div>
+      
+
+
+          <div style="margin:6px;">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" onclick="javascript:setBackground();" aria-expanded="true" aria-controls="collapseTwo">
+              夜间护眼模式
+            </a>
+        </div>
+          <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+          <div class="panel-body">
+            夜间模式已经开启，再次单击按钮即可关闭 
+          </div>
+        </div>
+
+        <div>
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;关 于&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+        </div>
+         <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+          <div class="panel-body">
+            Longford&#39;s Space
+          </div>
+          <div class="panel-body">
+            Copyright © 2019 贺龙飞 All Rights Reserved.
+          </div>
+        </div>
+      </div>
+
+
+      <hr style="margin-top:0px; margin-bottom:0px; width:80%; border-top: 1px solid #000;">
+      <hr style="margin-top:2px; margin-bottom:0px; width:80%; border-top: 3px solid #000;">
+      <div class="modal-footer">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+  <a id="rocket" href="#top" class=""></a>
+  <script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script>
+  
+    <a id="menu-switch"><i class="fa fa-bars fa-lg"></i></a>
+  
+</body>

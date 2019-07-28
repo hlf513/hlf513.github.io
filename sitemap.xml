@@ -2,30 +2,51 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://www.helongfei.com/2019/%E4%BD%BF%E7%94%A8-openresty-%E5%AE%9E%E7%8E%B0-grafana-%E5%85%8D%E7%99%BB%E5%BD%95/</loc>
+    <loc>http://www.helongfei.com/2019/%E7%9B%91%E6%8E%A7-go-runtime/</loc>
     
-    <lastmod>2019-07-25T02:31:25.220Z</lastmod>
+    <lastmod>2019-07-28T15:44:40.633Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://www.helongfei.com/2019/go%E5%B9%B6%E5%8F%91%E5%8E%9F%E7%90%86-%E8%B0%83%E5%BA%A6%E7%AF%87/</loc>
+    <loc>http://www.helongfei.com/2016/cikuang-jia-zong-jie/</loc>
     
-    <lastmod>2019-07-14T19:01:15.378Z</lastmod>
+    <lastmod>2019-07-27T20:31:07.167Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://www.helongfei.com/2017/laravel%E8%87%AA%E5%AE%9A%E4%B9%89%E7%94%A8%E6%88%B7%E6%9D%83%E9%99%90%E6%A0%A1%E9%AA%8C/</loc>
+    
+    <lastmod>2019-07-27T20:31:00.371Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://www.helongfei.com/2019/%E9%80%9A%E8%BF%87%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0-go-%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/</loc>
     
-    <lastmod>2019-07-14T13:05:00.455Z</lastmod>
+    <lastmod>2019-07-27T20:29:04.896Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://www.helongfei.com/2019/go%E5%B9%B6%E5%8F%91%E5%8E%9F%E7%90%86-%E8%B0%83%E5%BA%A6%E7%AF%87/</loc>
+    
+    <lastmod>2019-07-27T20:26:50.866Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://www.helongfei.com/2019/go-%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B-%E5%BA%94%E7%94%A8%E7%AF%87/</loc>
     
-    <lastmod>2019-07-13T09:07:19.290Z</lastmod>
+    <lastmod>2019-07-27T20:26:12.803Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://www.helongfei.com/2019/%E4%BD%BF%E7%94%A8-openresty-%E5%AE%9E%E7%8E%B0-grafana-%E5%85%8D%E7%99%BB%E5%BD%95/</loc>
+    
+    <lastmod>2019-07-25T02:31:25.220Z</lastmod>
     
   </url>
   
@@ -44,13 +65,6 @@
   </url>
   
   <url>
-    <loc>http://www.helongfei.com/2017/laravel%E8%87%AA%E5%AE%9A%E4%B9%89%E7%94%A8%E6%88%B7%E6%9D%83%E9%99%90%E6%A0%A1%E9%AA%8C/</loc>
-    
-    <lastmod>2017-12-29T16:48:41.499Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://www.helongfei.com/tags/index.html</loc>
     
     <lastmod>2017-11-11T07:52:27.050Z</lastmod>
@@ -61,13 +75,6 @@
     <loc>http://www.helongfei.com/categories/index.html</loc>
     
     <lastmod>2017-11-11T07:52:27.046Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://www.helongfei.com/2016/cikuang-jia-zong-jie/</loc>
-    
-    <lastmod>2017-11-11T07:52:27.045Z</lastmod>
     
   </url>
   

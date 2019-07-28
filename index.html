@@ -174,6 +174,60 @@
         
           <section id="main" style="float:none;">
   
+    <article id="post-2019/监控-go-runtime" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div id="articleInner" class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="thumb" itemprop="name">
+      <a class="article-title" href="/2019/监控-go-runtime/">监控 Go Runtime</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      
+	<a href="/2019/监控-go-runtime/" class="article-date">
+	  <time datetime="2019-07-27T20:02:00.000Z" itemprop="datePublished">2019-07-28</time>
+	</a>
+
+      
+    <a class="article-category-link" href="/categories/Go/">Go</a><a class="article-category-link" href="/categories/Go/监控/">监控</a>
+
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>GO 通常作为守护进程存在，若我们不做任何监控，放任其「自由」的使用资源，那有可能会发现意外情况，比如「Goroutine 泄露」。那我们应该如何监控，又要监控哪些指标呢？</p>
+        <!-- GO 通常作为守护进程存在，若我们不做任何监控，放任其「自由」的使用资源，那有可能会发现意外情况，比如「Goroutine 泄露」。那我们应该如何监控，又要监控哪些指标呢？
+
+监控指标监控的核心是监控指标，「有用」的指标才是有意义，那 Go 有哪些有意义的指标呢？
+我认为只要监控go runtime 相关的指标就行，整体分为两大类：
+
+CPU：goroutine、cgo
+内存：gc、heap......  -->
+        <p class="article-more-link">
+          <a href="/2019/监控-go-runtime/#more">阅读全文</a>
+        </p>
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/grafana/">grafana</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/graphite/">graphite</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/runtime/">runtime</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+<!-- Table of Contents -->
+
+  
     <article id="post-2019/通过源码学习-go-的生命周期" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div id="articleInner" class="article-inner">
     
@@ -195,7 +249,7 @@
 	</a>
 
       
-    <a class="article-category-link" href="/categories/go/">go</a>
+    <a class="article-category-link" href="/categories/Go/">Go</a>
 
       
     </div>
@@ -219,7 +273,7 @@ src/runtime/runtime2.go
       
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/go/">go</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/源码/">源码</a></li></ul>
 
     </footer>
   </div>
@@ -250,7 +304,7 @@ src/runtime/runtime2.go
 	</a>
 
       
-    <a class="article-category-link" href="/categories/Go-runtime/">Go runtime</a>
+    <a class="article-category-link" href="/categories/Go/">Go</a>
 
       
     </div>
@@ -270,7 +324,7 @@ src/runtime/runtime2.go
       
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/go/">go</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/runtime/">runtime</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/scheduler/">scheduler</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/runtime/">runtime</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/scheduler/">scheduler</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/并发原理/">并发原理</a></li></ul>
 
     </footer>
   </div>
@@ -301,7 +355,7 @@ src/runtime/runtime2.go
 	</a>
 
       
-    <a class="article-category-link" href="/categories/go/">go</a>
+    <a class="article-category-link" href="/categories/Go/">Go</a>
 
       
     </div>
@@ -321,7 +375,7 @@ src/runtime/runtime2.go
       
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/go/">go</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/并发编程/">并发编程</a></li></ul>
 
     </footer>
   </div>
@@ -524,7 +578,7 @@ Auth 中间件的工作原理
       
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/">laravel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/">laravel</a></li></ul>
 
     </footer>
   </div>
@@ -569,13 +623,14 @@ Auth 中间件的工作原理
 本文主要是参考2.2.6的源码
 
 设计思想使用 &amp;get_instance(); 可以引用所有已加载的类。
-中文手册http://codeigniter.org.cn/userguide2/index.html  
+中文手册http://codeigniter.org.cn/userguide2/index.html
 框架运行图解运行流程图
 运行生命周期
 开发注意事项Controller 中
 _remap 方法（接管路由）
 _output 方法（接管输出）
-_前缀的方法名都会被路由屏......  -->
+_前缀的方法名都会被路由屏蔽
+......  -->
         </p><p class="article-more-link">
           <a href="/2016/cikuang-jia-zong-jie/#more">阅读全文</a>
         </p>
@@ -585,7 +640,7 @@ _前缀的方法名都会被路由屏......  -->
       
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CI/">CI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/php/">php</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CI/">CI</a></li></ul>
 
     </footer>
   </div>
